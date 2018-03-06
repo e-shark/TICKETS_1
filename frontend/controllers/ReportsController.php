@@ -1,0 +1,77 @@
+<?php
+namespace frontend\controllers;
+
+use Yii;
+use yii\web\Controller;
+use frontend\models\Report_Oos;
+use frontend\models\Report_Titotals;
+use frontend\models\Report_Ticketslist;
+use frontend\models\Report_Repfailures;
+use frontend\models\Report_Tiperday;
+use frontend\models\Report_Tipermonth;
+use frontend\models\Report_Tilas;
+use frontend\models\Report_Titotals1562;
+use frontend\models\Report_Iteralog;
+
+
+class ReportsController extends Controller
+{
+	public function actionIndex()	
+    {
+            return $this->render( 'index' );
+    }
+	public function actionOosnow()	
+    {
+    	$model = new Report_Oos();
+    	$provider = $model->generate(Yii::$app->request->queryParams);
+    	return $this->render( 'oosnow',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionTitotals()
+    {
+        $model = new Report_Titotals();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'titotals',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionTicketslist()
+    {
+        $model = new Report_Ticketslist();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'ticketslist',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionRepfailures()
+    {
+        $model = new Report_Repfailures();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'repfailures',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionTiperday()
+    {
+        $model = new Report_Tiperday();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'tiperday',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionTipermonth()
+    {
+        $model = new Report_Tipermonth();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'tipermonth',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionTilas()
+    {
+        $model = new Report_Tilas();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'tilas',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionTitotals1562()
+    {
+        $model = new Report_Titotals1562();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'titotals1562',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionIteralog()
+    {
+        $model = new Report_Iteralog();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'iteralog',['provider'=>$provider, 'model'=>$model] );
+    }
+}
