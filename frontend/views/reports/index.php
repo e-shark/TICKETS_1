@@ -16,6 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
 	<?= '<p>'.Html::a('Отчет по поступлению заявок по месяцам', ['tipermonth'], ['class' => 'btn btn-success']).'</p>' ?>
 	<?= '<p>'.Html::a('Работа Аварийной Службы', ['tilas'], ['class' => 'btn btn-success']).'</p>' ?>
 	<?= '<p>'.Html::a('Отчет по выполнению заявок 1562', ['titotals1562'],['class' => 'btn btn-success']).'</p>' ?>
+	<?= '<p>'.Html::a('Список остановленных и запущенных лифтов', ['stopped-list'],['class' => 'btn btn-success']).'</p>' ?>
+	<?= '<p>'.Html::a('Количество остановленных лифтов по районам', ['stopped-sum'],['class' => 'btn btn-success']).'</p>' ?>
+	<?= '<p>'.Html::a('Отчет по количеству остановленных лифтов', ['stopped-count'],['class' => 'btn btn-success']).'</p>' ?>
 
      <?php 	if(FALSE!==Tickets::getUserOpRights()){// Reports below intended for use by organization staff only?>
 	<?= '<br><p>'.Html::a('Журнал экспорта в систему ИТЕРА', ['iteralog'],['class' => 'btn btn-success']).'</p>' ?>

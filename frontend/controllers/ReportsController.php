@@ -12,6 +12,9 @@ use frontend\models\Report_Tipermonth;
 use frontend\models\Report_Tilas;
 use frontend\models\Report_Titotals1562;
 use frontend\models\Report_Iteralog;
+use frontend\models\Report_StoppedList;
+use frontend\models\Report_StoppedSum;
+use frontend\models\Report_StoppedCount;
 
 
 class ReportsController extends Controller
@@ -73,5 +76,24 @@ class ReportsController extends Controller
         $model = new Report_Iteralog();
         $provider = $model->generate(Yii::$app->request->queryParams);
         return $this->render( 'iteralog',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionStoppedList()
+    {
+        $model = new Report_StoppedList();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'stoppedlist',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionStoppedSum()
+    {
+        $model = new Report_StoppedSum();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'stoppedsum',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionStoppedCount()
+    {
+        $model = new Report_StoppedCount();
+        $model->AutoFillIntervals(Yii::$app->request->queryParams['repyear']);
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'stoppedcount',['provider'=>$provider, 'model'=>$model] );
     }
 }
