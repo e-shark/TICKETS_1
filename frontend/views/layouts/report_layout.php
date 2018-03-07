@@ -30,25 +30,39 @@ AppAsset::register($this);
 <input type="checkbox" id="rep-nav-toggle" hidden>
 <div class="rep-nav">
     <label for="rep-nav-toggle" class="rep-nav-toggle" onclick=""></label>
+
+
     <h2 class="logo"> Отчеты </h2>
     <ul>
-    <li><?= Html::a('Список Заявок', ['ticketslist'], []) ?></li>
-    <li><?= Html::a('Отчет по выполнению заявок', ['titotals'], []) ?></li>
-    <li><?= Html::a('Отчет по неработающим лифтам', ['oosnow'], []) ?></li>
-    <li><?= Html::a('Отчет по повторным заявкам', ['repfailures'], []) ?></li>
-    <li><?= Html::a('Отчет по поступлению заявок по дням', ['tiperday'], []) ?></li>
-    <li><?= Html::a('Отчет по поступлению заявок по месяцам', ['tipermonth'], []) ?></li>
-    <li><?= Html::a('Работа Аварийной Службы', ['tilas'], []) ?></li>
-    <li><?= Html::a('Отчет по выполнению заявок 1562', ['titotals1562'],[]) ?></li>
-    <li><?= Html::a('Список остановленных и запущенных лифтов', ['stopped-list'],[]) ?></li>
-    <li><?= Html::a('Количество остановленных лифтов по районам', ['stopped-sum'],[]) ?></li>
-    <li><?= Html::a('Отчет по количеству остановленных лифтов', ['stopped-count'],[]) ?></li>
-    <br>
-    <?php if(FALSE!==Tickets::getUserOpRights()){// Reports below intended for use by organization staff only?>
-    <li><?= Html::a('Журнал экспорта в систему ИТЕРА', ['iteralog'],[]) ?></li>
-    <?php } ?>
+        <li><?= Html::a('Тестовое 1', ['#1'],[]) ?></li>
+        <li>
+            <input type="checkbox" id="group-1" checked hidden>
+            <label for="group-1">Тестовое 2</label>
+            <ul>
+                <li><?= Html::a('Тестовое 21', ['#1'],[]) ?></li>
+                <li><?= Html::a('Тестовое 21', ['#1'],[]) ?></li>
+            </ul>
+        </li>
+        <li><?= Html::a('Тестовое 3', ['#1'],[]) ?></li>
+        <br>
 
-</ul>
+        <li><?= Html::a('Список Заявок', ['ticketslist'], []) ?></li>
+        <li><?= Html::a('Отчет по выполнению заявок', ['titotals'], []) ?></li>
+        <li><?= Html::a('Отчет по неработающим лифтам', ['oosnow'], []) ?></li>
+        <li><?= Html::a('Отчет по повторным заявкам', ['repfailures'], []) ?></li>
+        <li><?= Html::a('Отчет по поступлению заявок по дням', ['tiperday'], []) ?></li>
+        <li><?= Html::a('Отчет по поступлению заявок по месяцам', ['tipermonth'], []) ?></li>
+        <li><?= Html::a('Работа Аварийной Службы', ['tilas'], []) ?></li>
+        <li><?= Html::a('Отчет по выполнению заявок 1562', ['titotals1562'],[]) ?></li>
+        <li><?= Html::a('Список остановленных и запущенных лифтов', ['stopped-list'],[]) ?></li>
+        <li><?= Html::a('Количество остановленных лифтов по районам', ['stopped-sum'],[]) ?></li>
+        <li><?= Html::a('Отчет по количеству остановленных лифтов', ['stopped-count'],[]) ?></li>
+        <br>
+        <?php if(FALSE!==Tickets::getUserOpRights()){// Reports below intended for use by organization staff only?>
+        <li><?= Html::a('Журнал экспорта в систему ИТЕРА', ['iteralog'],[]) ?></li>
+        <?php } ?>
+        <br>
+    </ul>
 </div>
 
 
@@ -89,7 +103,8 @@ AppAsset::register($this);
     ]);
     NavBar::end();
     ?>
-
+    <main role="main">
+    <article>
     <div class="container">
         <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
@@ -97,6 +112,8 @@ AppAsset::register($this);
         <?= Alert::widget() ?>
         <?= $content ?>
     </div>
+    </article>
+    </main>
 
 </div>
 

@@ -246,7 +246,7 @@ body {
     list-style: none;
 }
 
-.rep-nav > ul > li {
+.rep-nav  li {
     line-height: 2.5;
     opacity: 0;
     -webkit-transform: translateX(-50%);
@@ -259,7 +259,7 @@ body {
     transition: opacity .5s .1s, transform .5s .1s;
 }
 
-[id='rep-nav-toggle']:checked ~ .rep-nav > ul > li {
+[id='rep-nav-toggle']:checked ~ .rep-nav  li  {
     opacity: 1;
     -webkit-transform: translateX(0);
     -moz-transform: translateX(0);
@@ -345,7 +345,7 @@ body {
  * оформление ссылок пунктов меню
  */
 
-.rep-nav > ul > li > a {
+.rep-nav li > a, .rep-nav ul > b {
     display: inline-block;
     position: relative;
     padding: 0;
@@ -365,9 +365,8 @@ body {
 /**
  * состояние ссылок меню при наведении
  */
-
-.rep-nav > ul > li > a:hover,
-.rep-nav > ul > li > a:focus {
+.rep-nav li > a:hover,
+.rep-nav li > a:focus {
     color: white;
     padding-left: 15px;
 }
@@ -377,7 +376,7 @@ body {
  * линия подчеркивания ссылок меню
  */
 
-.rep-nav > ul > li > a:before {
+.rep-nav  li > a:before {
     content: '';
     display: block;
     position: absolute;
@@ -389,7 +388,7 @@ body {
     transition: width 0s ease;
 }
 
-.rep-nav > ul > li > a:after {
+.rep-nav li > a:after {
     content: '';
     display: block;
     position: absolute;
@@ -408,14 +407,14 @@ body {
  * ссылок при наведении
  */
 
-.rep-nav > ul > li > a:hover:before {
+.rep-nav  li > a:hover:before {
     width: 0%;
     background: #3bc1a0;
     -webkit-transition: width .5s ease;
     transition: width .5s ease;
 }
 
-.rep-nav > ul > li > a:hover:after {
+.rep-nav  li > a:hover:after {
     width: 0%;
     background: transparent;
     -webkit-transition: width 0s ease;
@@ -450,3 +449,32 @@ body {
     transition: opacity .5s, visibility .5s;
 }
 */
+
+.rep-nav2 input[type=checkbox] {
+position: absolute;
+opacity: 0;
+}
+.rep-nav2 label, .cd-accordion-menu a {
+position: relative;
+display: block;
+padding: 18px 18px 18px 64px;
+background: #4d5158;
+box-shadow: inset 0 -1px #555960;
+color: #ffffff;
+font-size: 1.6rem;
+}
+
+.rep-nav li ul {
+/*display: none;*/
+transition: all 0.3s;
+transform: scale(0);
+}
+
+.rep-nav input[type=checkbox]:checked + label + ul,
+.rep-nav input[type=checkbox]:checked + label:nth-of-type(n) + ul {
+transition: all 0.3s;
+transform: scale(1);
+/*display: block;*/
+}
+
+
