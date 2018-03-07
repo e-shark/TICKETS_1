@@ -29,8 +29,11 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => Yii::t('app','SE Kharkivgorlift'),
+        'brandLabel' => '<div ><img src="/img/logo_small.png" style="display: inline-block;">&nbsp;'.Yii::t('app','SE Kharkivgorlift').'</div>',
         'brandUrl' => Yii::$app->homeUrl,
+        'brandOptions'=>[
+            'style'=>"padding: 7px 1px;",
+        ],
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
