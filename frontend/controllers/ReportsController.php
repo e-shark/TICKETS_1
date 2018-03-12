@@ -15,7 +15,7 @@ use frontend\models\Report_Iteralog;
 use frontend\models\Report_StoppedList;
 use frontend\models\Report_StoppedSum;
 use frontend\models\Report_StoppedCount;
-
+use frontend\models\Report_ElevatorsList;
 
 class ReportsController extends Controller
 {
@@ -99,5 +99,11 @@ class ReportsController extends Controller
         $model->AutoFillIntervals(Yii::$app->request->queryParams['repyear']);
         $provider = $model->generate(Yii::$app->request->queryParams);
         return $this->render( 'stoppedcount',['provider'=>$provider, 'model'=>$model] );
+    }
+    public function actionElevatorsList()
+    {
+        $model = new Report_ElevatorsList();
+        $provider = $model->generate(Yii::$app->request->queryParams);
+        return $this->render( 'elevatorslist',['provider'=>$provider, 'model'=>$model] );
     }
 }

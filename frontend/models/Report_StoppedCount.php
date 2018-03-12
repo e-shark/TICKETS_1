@@ -116,10 +116,7 @@ left join
 on t.tiregion = r.districtname
 group by districtname ";
 
-//!!!!! where tioosbegin is not null
-
 //Yii::warning("\n----------------------------------------------------------------\n".$sqltext."\n----------------------------------------------------------------\n");
-
 
 		$provider = new SqlDataProvider([
 			'sql' => $sqltext,
