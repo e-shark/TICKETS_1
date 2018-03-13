@@ -36,10 +36,16 @@ class TicketInputForm extends Model
 		return $vtiRegions;
 	}
 
-	public static function getStreetsList( $GerionID = 0)
+	public static function getStreetsList( $RegionID = 0 )
 	{
-		$RegionName = Yii::$app->db->createCommand('SELECT districtname FROM district where districtlocality_id=159 and districtcode ='.$GerionID.';')->queryOne()["districtname"];	
-		$vStreets =  Yii::$app->db->createCommand('SELECT id, streetname as text FROM street where streetdistrict like "'.$RegionName.'";')->queryAll();	
+		//$RegionName = Yii::$app->db->createCommand('SELECT districtname FROM district where districtlocality_id=159 and districtcode ='.$RegionID.';')->queryOne()["districtname"];	
+		//$vStreets =  Yii::$app->db->createCommand('SELECT id, streetname as text FROM street where streetdistrict like "'.$RegionName.'";')->queryAll();	
+		$sql = "SELECT distinct street.id, street.streetname as text FROM elevators.facility
+				left join district on facility.fadistrict_id= district.id
+				left join street on facility.fastreet_id=street.id 
+				where district.districtcode = '$RegionID'
+				order by streetname ";
+		$vStreets =  Yii::$app->db->createCommand($sql)->queryAll();	
 		return $vStreets;
 	}
 
