@@ -345,7 +345,8 @@ body {
  * оформление ссылок пунктов меню
  */
 
-.rep-nav li > a, .rep-nav ul > b {
+.rep-nav li > label,
+.rep-nav li > a {
     display: inline-block;
     position: relative;
     padding: 0;
@@ -365,6 +366,8 @@ body {
 /**
  * состояние ссылок меню при наведении
  */
+ .rep-nav li > label:hover,
+.rep-nav li > label:focus ,
 .rep-nav li > a:hover,
 .rep-nav li > a:focus {
     color: white;
@@ -375,7 +378,7 @@ body {
 /**
  * линия подчеркивания ссылок меню
  */
-
+.rep-nav  li > label:before,
 .rep-nav  li > a:before {
     content: '';
     display: block;
@@ -388,6 +391,7 @@ body {
     transition: width 0s ease;
 }
 
+.rep-nav li > label:after,
 .rep-nav li > a:after {
     content: '';
     display: block;
@@ -407,6 +411,7 @@ body {
  * ссылок при наведении
  */
 
+.rep-nav  li > label:hover:before,
 .rep-nav  li > a:hover:before {
     width: 0%;
     background: #3bc1a0;
@@ -414,6 +419,7 @@ body {
     transition: width .5s ease;
 }
 
+.rep-nav  li > label:hover:after,
 .rep-nav  li > a:hover:after {
     width: 0%;
     background: transparent;
@@ -427,7 +433,6 @@ body {
  * спорная такая фича, если оно вам надо
  * просто раскомментируйте
 */
-
 /*
 .mask-content {
     display: block;
@@ -466,15 +471,23 @@ font-size: 1.6rem;
 
 .rep-nav li ul {
 /*display: none;*/
-transition: all 0.3s;
-transform: scale(0);
+/*transition: all 0.3s;*/
+/*transform: scale(0);*/
+    max-height: 0;
+    transform: scaleY(0);    
+    transform-origin: top;
+    transition: max-height 0.25s, transform 0.25s;
 }
 
-.rep-nav input[type=checkbox]:checked + label + ul,
-.rep-nav input[type=checkbox]:checked + label:nth-of-type(n) + ul {
-transition: all 0.3s;
-transform: scale(1);
+.rep-nav label + input[type=checkbox]:checked + ul,
+.rep-nav label:nth-of-type(n) + input[type=checkbox]:checked + ul {
+/*transition: all 0.3s;*/
+/*transform: scale(1);*/
+    max-height: 100px;
+    /*transition: height 1s , ease 0.35s;*/
 /*display: block;*/
+    transform: scaleY(1);    
+    transition: max-height 0.25s, transform 0.25s;
 }
 
 
