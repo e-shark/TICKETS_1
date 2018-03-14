@@ -36,8 +36,8 @@ AppAsset::register($this);
     <ul>
         <li><?= Html::a('Тестовое 1', ['#1'],[]) ?></li>
         <li>
-            <label for="group-1">Тестовое 2</label>
             <input type="checkbox" id="group-1" checked hidden>
+            <label for="group-1">Тестовое 2 <i></i></label>
             <ul>
                 <li><?= Html::a('Тестовое 21', ['#1'],[]) ?></li>
                 <li><?= Html::a('Тестовое 21', ['#1'],[]) ?></li>

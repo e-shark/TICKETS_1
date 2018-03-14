@@ -479,8 +479,8 @@ font-size: 1.6rem;
     transition: max-height 0.25s, transform 0.25s;
 }
 
-.rep-nav label + input[type=checkbox]:checked + ul,
-.rep-nav label:nth-of-type(n) + input[type=checkbox]:checked + ul {
+.rep-nav li > input[type=checkbox]:checked + label + ul,
+.rep-nav li > input[type=checkbox]:checked + label:nth-of-type(n) + ul {
 /*transition: all 0.3s;*/
 /*transform: scale(1);*/
     max-height: 100px;
@@ -490,4 +490,44 @@ font-size: 1.6rem;
     transition: max-height 0.25s, transform 0.25s;
 }
 
+.rep-nav label {
+
+}
+
+
+.rep-nav  li > label > i{
+    position: absolute;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    right: 20px;
+    bottom: 5px;
+}
+
+
+.rep-nav  li > label:hover > i:before,
+.rep-nav  li > label:hover > i:after {
+    position: absolute;
+    content: '';
+    width: 12px;
+    height: 2px;
+    background-color: white;
+    transition: transform 250ms ease;
+}
+
+.rep-nav  li > label:hover > i:before {
+    transform: translate(-4px,6px) rotate(45deg);
+}
+
+.rep-nav  li > label:hover > i:after {
+    transform: translate(4px,6px) rotate(-45deg);
+}
+
+.rep-nav  li > input[type=checkbox]:checked + label:hover > i:before {
+    transform: translate(4px,6px) rotate(45deg);
+}
+
+.rep-nav  li > input[type=checkbox]:checked + label:hover > i:after {
+    transform: translate(-4px,6px) rotate(-45deg);
+}       
 
