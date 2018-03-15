@@ -22,6 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <li><?= Html::a('Количество остановленных лифтов по районам', ['stopped-sum'],[]) ?></li>
     <li><?= Html::a('Отчет по количеству остановленных лифтов', ['stopped-count'],[]) ?></li>
     <li><?= Html::a('Перечень лифтов', ['elevators-list'],[]) ?></li>
+    <li><?= Html::a('Свод заявок 1562', ['summary1562'],[]) ?></li>
     <br>
     <?php if(FALSE!==Tickets::getUserOpRights()){// Reports below intended for use by organization staff only?>
     <li><?= Html::a('Журнал экспорта в систему ИТЕРА', ['iteralog'],[]) ?></li>

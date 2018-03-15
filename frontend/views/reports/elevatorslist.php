@@ -45,7 +45,8 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
                 'attribute' => 'faaddressno',
             ],
             [
-                'label' =>"Подъезд",
+                'label' =>"<div style='height: 300px; width:30px;'> <div style='position:relative ; top: 270px; transform: rotate(-90deg)'>Подъезд</div></div>",
+                'encodeLabel' => false,
                 'content' => function($data){
                 	return $data['elporchno']." ".$data['elporchpos'];
                 }

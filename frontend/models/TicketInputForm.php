@@ -92,7 +92,7 @@ class TicketInputForm extends Model
 
     public static function getExecutantsList($DivisionID)
     {
-		return  Yii::$app->db->createCommand('SELECT id, concat( ifnull(lastname,"")," ",ifnull(firstname,"")," ",ifnull(patronymic,"")) as text FROM employee WHERE division_id = '.$DivisionID.';')->queryAll();	
+		return  Yii::$app->db->createCommand('SELECT id, concat( ifnull(lastname,"")," ",ifnull(firstname,"")," ",ifnull(patronymic,"")) as text FROM employee WHERE division_id = '.$DivisionID.' ORDER BY lastname;')->queryAll();	
     }
 
 	public static function getExecutantsListForLAS()
