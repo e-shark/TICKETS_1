@@ -21,6 +21,8 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
 <div class="report-holder">
 	<h1><?= Html::encode($this->title) ?></h1>
 
+    <?php echo $this->render('_paramsfilter1.php', [ 'model'=>$model]); ?>
+
 	<?php
         $tiColumns = [
             ['class' => 'yii\grid\SerialColumn'],
@@ -34,16 +36,17 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
             ],
             [
                 //'label' =>"Заявок",
-                'label' =>"<div style='height: 300px; width:20px;'> <div style='position:relative ; top: 280px; transform: rotate(-90deg)'>".str_replace(" ","&nbsp;","Заявок")."</div></div>",
+                'label' =>"<div style='height: 280px; width:20px;'> <div style='position:relative ; top: 260px; transform: rotate(-90deg)'>".str_replace(" ","&nbsp;","Заявок")."</div></div>",
                 'encodeLabel' => false,
                 'attribute' => 'XALL',
             ],
             [
                 //'label' =>"Причина не определена",
-                'label' =>"<div style='height: 300px; width:20px;'> <div style='position:relative ; top: 280px; transform: rotate(-90deg)'>".str_replace(" ","&nbsp;","Причина не определена")."</div></div>",
+                'label' =>"<div style='height: 280px; width:20px;'> <div style='position:relative ; top: 260px; transform: rotate(-90deg)'>".str_replace(" ","&nbsp;","Причина не определена")."</div></div>",
                 'encodeLabel' => false,
                 'content' => function($data){
-                	return $data['X0'] + $data['X39'] + $data['XX'] + $data['XM'];
+                	$sum = $data['X0'] + $data['X39'] + $data['XX'] + $data['XM'];
+                	return $sum>0?$sum:"";
                 },
             ],
 

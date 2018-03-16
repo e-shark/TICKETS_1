@@ -10,14 +10,21 @@ class Report_Summary1562 extends Model
 {
 	public $datefrom;
 	public $dateto;
+	public $reportpagesize;
+	public $district;
+	public $status;
+
 	public $provider;		// сводная таблица заявок по районам по лифтам
 	public $counters;		// счетчики общего кол-ва неисправностей разного вида
 
 	public function generate($params)
 	{
+        if (empty($params['datefrom'] )) 
+            $params['datefrom'] = "1-".date('m-Y');       
+        
  		$f1sql = Report_Titotals::fillparamsfiltet1($this,$params);
 
-		$sqltbl='SELECT t.tiregion, t.tiobjectcode, count(t.tiobjectcode) as XALL
+		$sqltbl="SELECT t.tiregion, t.tiobjectcode, count(t.tiobjectcode) as XALL
 				,case when t.tiresulterrorcode =0 or t.tiresulterrorcode is null then count(id) end XX 
 				,case when t.tiresulterrorcode between 1 and 99 then count(id) end X0 
 				,case when t.tiresulterrorcode between 100 and 199 then count(id) end X1 
@@ -65,11 +72,11 @@ class Report_Summary1562 extends Model
 				,case when t.tiresulterrorcode = 9999 then count(id) end X99 
 				FROM ticket t 
 				WHERE t.ticoderemote is not null
-					AND t.tiobjectcode>0
+					AND t.tiobject_id = 1
+					AND t.tiobjectcode>0 $f1sql
 				GROUP BY  t.tiregion, t.tiobjectcode 
-				ORDER BY  t.tiregion, t.tiobjectcode ';
+				ORDER BY  t.tiregion, t.tiobjectcode ";
 
-		// В запрос добавить проверку, что это лифт !!!!!!				
 
 		$sqlcnt="SELECT ts.tiregion, count(ts.tiobjectcode), sum(XALL) as sXALL
 			,sum(XX) as sXX, sum(X0) as sX0, sum(X1) as sX1, sum(X2) as sX2, sum(X3) as sX3, sum(X4) as sX4, sum(X5) as sX5, sum(X6) as sX6, sum(X7) as sX7, sum(X8) as sX8, sum(X9) as sX9
@@ -81,6 +88,7 @@ class Report_Summary1562 extends Model
 
 		$this->provider = new SqlDataProvider([
 			'sql' => $sqltbl,
+			'pagination'=>['pageSize'=>$this->reportpagesize],			
 		]);
 
 		$this->counters = Yii::$app->db->createCommand($sqlcnt)->queryOne();
@@ -92,7 +100,7 @@ class Report_Summary1562 extends Model
 	{
 		if (!empty($this->counters['s'.$Name])){
 			$ColumnSet[]=[
-                'label' =>"<div style='height: 300px; width:20px;'> <div style='position:relative ; top: 280px; transform: rotate(-90deg)'>".str_replace(" ","&nbsp;",$Description)."</div></div>",
+                'label' =>"<div style='height: 280px; width:20px;'> <div style='position:relative ; top: 260px; transform: rotate(-90deg)'>".str_replace(" ","&nbsp;",$Description)."</div></div>",
                 'encodeLabel' => false,
 				'content' => function($data) use ($Name){ 
 					return empty($data[$Name])?"":$data[$Name]; 
