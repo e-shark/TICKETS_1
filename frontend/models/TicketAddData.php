@@ -131,23 +131,8 @@ class TicketAddData extends Model
 
 	public static function getGetTicketId()
 	{
-		$CountMas =  Yii::$app->db->createCommand('SELECT dDate, iCount FROM call_count;')->queryOne();	
-		$DateNow = date("Y-m-d");
-		$NowMas = explode('-',$DateNow);
-		$LastMas = explode('-',$CountMas['dDate']);
-		$Counter = $CountMas['iCount'];
-
-		if (($NowMas[0] == $LastMas[0]) && ($NowMas[1] == $LastMas[1]) && ($NowMas[2] == $LastMas[2])) 
-			$Counter = $Counter + 1;
-		else 
-			$Counter = 1;
-
-		Yii::$app->db->createCommand('DELETE FROM call_count;')->execute();
-		Yii::$app->db->createCommand()->insert('call_count', ['dDate' => $DateNow,'iCount' => $Counter])->execute();
-
-		$vTiId = $NowMas[0][2].$NowMas[0][3].$NowMas[1].$NowMas[2].'-'.sprintf("%'.03d", $Counter);
-
-		return $vTiId;
+        $command = Yii::$app->db->createCommand("call elevators.getNewTicketRegNumber(@regnum, @regnumstr)")->execute();
+        return  Yii::$app->db->createCommand("select @regnumstr as acnstr;")->queryScalar();
 	}
 
     public static function getFacilityCod($FacilityID = NULL)
