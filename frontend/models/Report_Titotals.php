@@ -88,7 +88,7 @@ class Report_Titotals extends Model
             for($i=0;$i<count($fstrar);$i++)if($i+1<count($fstrar))$fstrar[$i]=$fstrar[$i].'%';
             $fstr=implode( $fstrar );
             //$filtersql = " and ((ticket.ticode like '%$model->tifindstr%' ) OR (ticket.ticoderemote like '%$model->tifindstr%' )  OR (ticket.tiobjectcode like '%$model->tifindstr%') OR (ticket.tiaddress like '%$model->tifindstr%')) ";
-        	$filtersql .= " and ((ticket.ticode like '%$fstr%' ) OR (ticket.ticoderemote like '%$fstr%' )  OR (ticket.tiobjectcode like '%$fstr%') OR (ticket.tiaddress like '%$fstr%')) ";
+        	$filtersql .= " and ((ticode like '%$fstr%' ) OR (ticoderemote like '%$fstr%' )  OR (tiobjectcode like '%$fstr%') OR (tiaddress like '%$fstr%')) ";
 		}
 		//---Preparу sql  statement for calltype
 		if( array_key_exists('calltype',$model->attributes ) ) if( !empty($params['calltype'] ) ) {
@@ -97,7 +97,16 @@ class Report_Titotals extends Model
 			else if($model->calltype ==2 )	$filtersql	.=" and (tidesk_id=6) ";	// ОДС (без ЦДС)
 			else 							$filtersql	.=" and (ticalltype like '$model->calltype') ";
 		}
-		
+		//---Preparу sql  statement for tiobjectcode,
+		if( array_key_exists('tiobjectcode',$model->attributes ) ) if( !empty($params['tiobjectcode'] ) ) {
+			$model->tiobjectcode = $params['tiobjectcode'];
+			$filtersql	.=" and (tiobjectcode='$model->tiobjectcode') ";
+		}
+		//---Preparу sql  statement for Executant division,
+		if( array_key_exists('tiexecutantdesk',$model->attributes ) ) if( !empty($params['tiexecutantdesk'] ) ) {
+			$model->tiexecutantdesk = $params['tiexecutantdesk'];
+			$filtersql	.=" and (executantdeskid='$model->tiexecutantdesk') ";
+		}
 		//---Preparу sql  statement for Executant, assumes the name is Lastname [firstname] [patronymic]
 		if( array_key_exists('tiexecutant',$model->attributes ) ) if( !empty($params['tiexecutant'] ) ) {
 			$model->tiexecutant = $params['tiexecutant'];

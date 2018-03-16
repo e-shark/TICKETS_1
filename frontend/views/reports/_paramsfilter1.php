@@ -86,6 +86,18 @@ use frontend\models\Report_Titotals;
         echo '<div class="form-group col-xs-2" id="divtifindstr"> Заявка:'.
         Html::textinput('tifindstr', $model->tifindstr,['class'=>'form-control']).'</div>';
       }
+      //---Objectcode
+      if( array_key_exists('tiobjectcode',$model->attributes ) ) {
+        //echo '<div style="margin-top:5px">Заявка:'.
+        echo '<div class="form-group col-xs-2" id="divtiobjectcode"> Инв.номер:'.
+        Html::textinput('tiobjectcode', $model->tiobjectcode,['class'=>'form-control']).'</div>';
+      }
+      //---Executant division
+      if( array_key_exists('tiexecutantdesk',$model->attributes ) ) {
+        //echo '<div style="margin-top:5px">Заявка:'.
+        echo '<div class="form-group col-xs-2" id="divtivexecutantdesk"> Подр.исполнителя:'.
+        Html::dropDownList('tiexecutantdesk', $model->tiexecutantdesk,  Tickets::getMasterDesksList(TRUE),['class'=>'form-control']).'</div>';
+      }
       //---Executant
       if( array_key_exists('tiexecutant',$model->attributes ) ) {
         //echo '<div style="margin-top:5px">Заявка:'.
