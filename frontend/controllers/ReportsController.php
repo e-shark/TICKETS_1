@@ -20,7 +20,7 @@ use frontend\models\Report_StoppedCount;
 class ReportsController extends Controller
 {
     public function init(){
-        $this->layout = 'report_layout.php';
+        //$this->layout = 'report_layout.php';
         parent::init();
     }    
 	public function actionIndex()	

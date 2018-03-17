@@ -9,8 +9,8 @@
 
 .rep-nav {
     /*  ширна произвольная, не стесняйтесь экспериментировать */
-    width: 450px;
-    min-width: 450px;
+    width: 500px;
+    min-width: 500px;
     /* фиксируем и выставляем высоту панели на максимум */
     height: 100%;
     position: fixed;
@@ -18,7 +18,7 @@
     bottom: 0;
     margin: 0;
     /* сдвигаем (прячем) панель относительно левого края страницы */
-    left: -450px;
+    left: -500px;
     /* внутренние отступы */
     padding: 15px 20px;
     /* плавный переход смещения панели */
@@ -41,7 +41,7 @@
     /* абсолютно позиционируем */
     position: absolute;
     /* относительно левого края панели */
-    left: 450px;
+    left: 500px;
     /* отступ от верхнего края панели */
     top: 4em;
     /* внутренние отступы */
@@ -257,6 +257,7 @@ body {
     -moz-transition: opacity .5s .1s, -moz-transform .5s .1s;
     -ms-transition: opacity .5s .1s, -ms-transform .5s .1s;
     transition: opacity .5s .1s, transform .5s .1s;
+    list-style: none;
 }
 
 [id='rep-nav-toggle']:checked ~ .rep-nav  li  {
@@ -455,6 +456,8 @@ body {
 }
 */
 
+/* Реализация сворачивания-разворачивания аккордеона
+*/
 .rep-nav2 input[type=checkbox] {
 position: absolute;
 opacity: 0;
@@ -483,17 +486,16 @@ font-size: 1.6rem;
 .rep-nav li > input[type=checkbox]:checked + label:nth-of-type(n) + ul {
 /*transition: all 0.3s;*/
 /*transform: scale(1);*/
-    max-height: 100px;
+    max-height: 1000px;
     /*transition: height 1s , ease 0.35s;*/
 /*display: block;*/
     transform: scaleY(1);    
     transition: max-height 0.25s, transform 0.25s;
 }
 
-.rep-nav label {
 
-}
-
+/* Стрелка сврернуть/развернуть для аккордеона
+*/
 
 .rep-nav  li > label > i{
     position: absolute;

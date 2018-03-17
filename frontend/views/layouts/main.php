@@ -9,6 +9,7 @@ use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
 use common\widgets\Alert;
+use frontend\models\Tickets;
 
 AppAsset::register($this);
 ?>
@@ -25,6 +26,60 @@ AppAsset::register($this);
 </head>
 <body>
 <?php $this->beginBody() ?>
+
+<?php $uoprights=Tickets::getUserOpRights();?>
+<?php if (!Yii::$app->user->isGuest) {?>
+
+    <?php // Навигационная панель ?>
+    <input type="checkbox" id="rep-nav-toggle" hidden>
+    <div class="rep-nav">
+        <label for="rep-nav-toggle" class="rep-nav-toggle" onclick=""></label>
+
+
+        <h2 class="logo"> МЕНЮ </h2>
+        <ul>
+            <?php
+            if( 
+                (FALSE !== strpos($uoprights['oprights'],'D')) || 
+                (FALSE !== strpos($uoprights['oprights'],'d')) ||
+                (FALSE !== strpos($uoprights['oprights'],'M')) ||
+                (FALSE !== strpos($uoprights['oprights'],'F')) ){
+                echo "<li>".Html::a(YII::t('app','Tickets'), ["tickets/index"],[])."</li>";
+            }
+
+            if( FALSE !== strpos($uoprights['oprights'],'D' ) ) {
+                echo "<li>".Html::a(YII::t('app','Ticket input'), ["ticket-input/inputform"], [])."</li>";
+            } 
+
+            if( FALSE === strpos($uoprights['oprights'],'F' ) ) {  ?>
+                <li>
+                    <input type="checkbox" id="group-1" checked hidden>
+                    <label for="group-1"><?=YII::t('app','Reports')?><i></i></label>
+                    <ul>
+                        <li><?= Html::a('Список Заявок', ['reports/ticketslist'], []) ?></li>
+                        <li><?= Html::a('Отчет по выполнению заявок', ['reports/titotals'], []) ?></li>
+                        <li><?= Html::a('Отчет по неработающим лифтам', ['reports/oosnow'], []) ?></li>
+                        <li><?= Html::a('Отчет по повторным заявкам', ['reports/repfailures'], []) ?></li>
+                        <li><?= Html::a('Отчет по поступлению заявок по дням', ['reports/tiperday'], []) ?></li>
+                        <li><?= Html::a('Отчет по поступлению заявок по месяцам', ['reports/tipermonth'], []) ?></li>
+                        <li><?= Html::a('Работа Аварийной Службы', ['reports/tilas'], []) ?></li>
+                        <li><?= Html::a('Отчет по выполнению заявок 1562', ['reports/titotals1562'],[]) ?></li>
+                        <li><?= Html::a('Список остановленных и запущенных лифтов', ['reports/stopped-list'],[]) ?></li>
+                        <li><?= Html::a('Количество остановленных лифтов по районам', ['reports/stopped-sum'],[]) ?></li>
+                        <li><?= Html::a('Отчет по количеству остановленных лифтов', ['reports/stopped-count'],[]) ?></li>
+                        <?php if(FALSE!==Tickets::getUserOpRights()){// Reports below intended for use by organization staff only?>
+                        <li><?= Html::a('Журнал экспорта в систему ИТЕРА', ['reports/iteralog'],[]) ?></li>
+                        <?php } ?>
+                    </ul>
+                </li>
+                <li><?= Html::a(YII::t('app','Map'), ["maps/index"],[]) ?></li>
+            <?php }   ?>
+
+        </ul>
+    </div>
+    <?php $this->registerCssFile('css/left-nav-style.css'); ?>
+
+<?php }?>
 
 <div class="wrap">
     <?php
