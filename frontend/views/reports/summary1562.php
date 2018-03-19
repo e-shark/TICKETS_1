@@ -52,50 +52,6 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
 
         ];
 
-        /*
-        if ( !empty($model->counters['sX99'])) $tiColumns[]=[ 'label' =>"Отмененных", 'content' => function($data){ return empty($data['X99'])?"":$data['X99']; }, ];
-        if ( !empty($model->counters['sX1'])) $tiColumns[]=[ 'label' =>"Датчики", 'content' => function($data){ return empty($data['X1'])?"":$data['X1'] ; } ];
-        if ( !empty($model->counters['sX2'])) $tiColumns[]=[ 'label' =>"Этажные переключатели", 'content' => function($data){ return empty($data['X2'])?"":$data['X2']; }, ];
-        if ( !empty($model->counters['sX3'])) $tiColumns[]=[ 'label' =>"Концевые выключатели", 'content' => function($data){ return empty($data['X3'])?"":$data['X3']; }, ];
-        if ( !empty($model->counters['sX4'])) $tiColumns[]=[ 'label' =>"Вызывные аппараты", 'content' => function($data){ return empty($data['X4'])?"":$data['X4']; }, ];
-        if ( !empty($model->counters['sX5'])) $tiColumns[]=[ 'label' =>"Посты управления", 'content' => function($data){ return empty($data['X5'])?"":$data['X5']; }, ];
-        if ( !empty($model->counters['sX6'])) $tiColumns[]=[ 'label' =>"Пост «Ревизия»", 'content' => function($data){ return empty($data['X6'])?"":$data['X6']; }, ];
-        if ( !empty($model->counters['sX7'])) $tiColumns[]=[ 'label' =>"Световое табло", 'content' => function($data){ return empty($data['X7'])?"":$data['X7']; }, ];
-        if ( !empty($model->counters['sX8'])) $tiColumns[]=[ 'label' =>"Защита электродвигателя", 'content' => function($data){ return empty($data['X8'])?"":$data['X8']; }, ];
-        if ( !empty($model->counters['sX9'])) $tiColumns[]=[ 'label' =>"Неисправность эл. элементов схемы", 'content' => function($data){ return empty($data['X9'])?"":$data['X9']; }, ];
-        if ( !empty($model->counters['sX10'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X10'])?"":$data['X10']; }, ];
-        if ( !empty($model->counters['sX11'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X11'])?"":$data['X11']; }, ];
-        if ( !empty($model->counters['sX12'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X12'])?"":$data['X12']; }, ];
-        if ( !empty($model->counters['sX13'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X13'])?"":$data['X13']; }, ];
-        if ( !empty($model->counters['sX14'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X14'])?"":$data['X14']; }, ];
-        if ( !empty($model->counters['sX15'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X15'])?"":$data['X15']; }, ];
-        if ( !empty($model->counters['sX16'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X16'])?"":$data['X16']; }, ];
-        if ( !empty($model->counters['sX17'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X17'])?"":$data['X17']; }, ];
-        if ( !empty($model->counters['sX18'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X18'])?"":$data['X18']; }, ];
-        if ( !empty($model->counters['sX19'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X19'])?"":$data['X19']; }, ];
-        if ( !empty($model->counters['sX20'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X20'])?"":$data['X20']; }, ];
-        if ( !empty($model->counters['sX21'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X21'])?"":$data['X21']; }, ];
-        if ( !empty($model->counters['sX22'])) $tiColumns[]=[ 'label' =>"", 'content' => function($data){ return empty($data['X22'])?"":$data['X22']; }, ];
-        if ( !empty($model->counters['sX23'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X23',];
-        if ( !empty($model->counters['sX24'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X24',];
-        if ( !empty($model->counters['sX25'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X25',];
-        if ( !empty($model->counters['sX26'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X26',];
-        if ( !empty($model->counters['sX27'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X27',];
-        if ( !empty($model->counters['sX28'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X28',];
-        if ( !empty($model->counters['sX29'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X29',];
-        if ( !empty($model->counters['sX30'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X30',];
-        if ( !empty($model->counters['sX31'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X31',];
-        if ( !empty($model->counters['sX32'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X32',];
-        if ( !empty($model->counters['sX33'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X33',];
-        if ( !empty($model->counters['sX34'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X34',];
-        if ( !empty($model->counters['sX35'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X35',];
-        if ( !empty($model->counters['sX36'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X36',];
-        if ( !empty($model->counters['sX37'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X37',];
-        if ( !empty($model->counters['sX38'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X38',];
-        if ( !empty($model->counters['sX40'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X40',];
-        if ( !empty($model->counters['sX60'])) $tiColumns[]=[ 'label' =>"", 'attribute' => 'X60',];
-        */
-
         $model->FillColumnSet( $tiColumns, "X99", "Отмененных");
         $model->FillColumnSet( $tiColumns, "X1", "Датчики");
         $model->FillColumnSet( $tiColumns, "X2", "Этажные переключатели");
@@ -136,7 +92,7 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
         $model->FillColumnSet( $tiColumns, "X37", "Ослабление клемм");
         $model->FillColumnSet( $tiColumns, "X38", "Хищения");
         $model->FillColumnSet( $tiColumns, "X40", "Ложные вызова и др.");
-        $model->FillColumnSet( $tiColumns, "X60", "Причины не запуска лифта");
+        $model->FillColumnSet( $tiColumns, "X60", "Прочие неисправности");
         
 
         echo GridView::widget([
