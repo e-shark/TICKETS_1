@@ -10,6 +10,7 @@ use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
 use common\widgets\Alert;
 use frontend\models\Tickets;
+use components\ShadeMenu\ShadeMenu;
 
 AppAsset::register($this);
 ?>
@@ -82,6 +83,7 @@ AppAsset::register($this);
 <?php }?>
 
 <div class="wrap">
+
     <?php
     NavBar::begin([
         'brandLabel' => '<div ><img src="/img/logo_small.png" style="display: inline-block;">&nbsp;'.Yii::t('app','SE Kharkivgorlift').'</div>',
@@ -123,6 +125,33 @@ AppAsset::register($this);
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
         <?= Alert::widget() ?>
+
+<br>--------------<br>
+<?php
+echo ShadeMenu::widget([
+    'caption'=>"МЕНЮ",
+    'items'=>[
+        ['caption'=>'Пункт 1',
+         'href'=>'#1'
+        ],
+        ['caption'=>'Пункт 2',
+         'items'=>[
+                ['caption'=>'Пункт 21',
+                 'href'=>'#21'
+                ],
+                ['caption'=>'Пункт 22',
+                 'href'=>'#22'
+                ],
+            ],
+        ],
+        ['caption'=>'Пункт 3',
+         'href'=>'#3'
+        ],
+    ],
+    'options'=>[],
+]);
+?>
+<br>--------------<br>
         <?= $content ?>
     </div>
 </div>
