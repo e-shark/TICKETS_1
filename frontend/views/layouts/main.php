@@ -76,7 +76,7 @@ AppAsset::register($this);
         <?= Alert::widget() ?>
 
 
-        <?php $this->registerCssFile('css/left-nav-style.css'); ?>
+        <?php //$this->registerCssFile('css/left-nav-style.css'); ?>
         <?php
             $reportsitms=[
                 [ 'caption' => 'Список Заявок',                             'href' => 'reports/ticketslist', ],

@@ -16,6 +16,7 @@ class ShadeMenu extends Widget
     public function init() {
         parent::init();
         $this->_HTMLstr = "";
+        $this->registerAssets();
     }
 
     public function run() {
@@ -36,7 +37,7 @@ class ShadeMenu extends Widget
     public function registerAssets()
     {
         $view = $this->getView();
-        //ShadeMenuAsset::register($view);
+        ShadeMenuAsset::register($view);
     }
 
     public function AddItem($item)
@@ -65,8 +66,7 @@ class ShadeMenu extends Widget
     }
 
     /*  Определяет, есть ли указаная ссылка в списке пунктов меню
-        (не реализует вложения)
-    */
+        (не реализует вложения) */
     public function IfRoutePresent($items, $route)
     {
         $res = false;
