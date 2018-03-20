@@ -2,6 +2,7 @@
 
 namespace components\ShadeMenu;
  
+use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;
 
@@ -18,9 +19,17 @@ class ShadeMenu extends Widget
     }
 
     public function run() {
+        $this->_HTMLstr .= "<input type='checkbox' id='rep-nav-toggle' hidden> \n";
+        $this->_HTMLstr .= "<div class='rep-nav'> \n";
+        $this->_HTMLstr .= "<label for='rep-nav-toggle' class='rep-nav-toggle' onclick=''></label> \n";
+        $this->_HTMLstr .= '<h2 class="logo">'.$this->caption."</h2> \n";
+        $this->_HTMLstr .= "<ul> \n";
         foreach ($this->items as $value) {
-            $this->AddItem($value['caption'], $value['items'], []);
+            $this->AddItem($value);
         }
+
+        $this->_HTMLstr .= "</ul> \n";
+        $this->_HTMLstr .= "</div> \n";        
         return $this->_HTMLstr;
     }
 
@@ -30,16 +39,43 @@ class ShadeMenu extends Widget
         //ShadeMenuAsset::register($view);
     }
 
-    public function AddItem($caption, $item)
+    public function AddItem($item)
     {
-        if (is_array($item)) {
+        $caption = $item['caption'];
+        $href =  $item['href'];
+        $items =  $item['items'];
+        $this->_HTMLstr .= "<li>";
+        if ((!empty($items)) && (is_array($items))) {
+            if ($this->IfRoutePresent($items, Yii::$app->controller->route))
+                $checked = "checked";
+            else
+                $checked = "";
+            $this->_HTMLstr .= "<input type='checkbox' id='group-1' $checked hidden> \n";
+            $this->_HTMLstr .= '<label for="group-1">'.$caption."<i></i></label>\n";
             $this->_HTMLstr .= "<ul>\n";
-            foreach ($item as $value) {
-                $this->AddItem($value['caption'], $value['items'], []);
+            foreach ($items as $value) {
+                $this->AddItem($value);
             }
             $this->_HTMLstr .= "</ul>\n";
         }else{
-            $this->_HTMLstr .= "<li>".Html::a($caption, [$item], [])."</li>\n";
+            if (empty($href)) $href= "#1";
+            $this->_HTMLstr .= Html::a($caption, [$href], []);
         }
+        $this->_HTMLstr .= "</li>\n";
     }
+
+    /*  Определяет, есть ли указаная ссылка в списке пунктов меню
+        (не реализует вложения)
+    */
+    public function IfRoutePresent($items, $route)
+    {
+        $res = false;
+        foreach ($items as $value) {
+            if (!empty($value['href']))
+                if ($route == $value['href']) 
+                    $res = true;
+        }
+        return $res;
+    }
+
 }
