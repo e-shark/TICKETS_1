@@ -5,14 +5,10 @@ use yii\web\AssetBundle;
 
 class ShadeMenuAsset extends AssetBundle
 {
-    public $sourcePath = '@app/../components/ShadeMenu/';
-    public $css = [
-        'css/shade-menu.css'
-    ];
-    
-    public $js = [
-    ];
-    public $depends = [
-    ];
+    public $sourcePath = __DIR__;
+    public $css = [ 'css/shade-menu.css' ];
+    public $js = [ ];
+    public $depends = [ ];
+
 }
 
