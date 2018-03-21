@@ -10,7 +10,7 @@ use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
 use common\widgets\Alert;
 use frontend\models\Tickets;
-use components\ShadeMenu\ShadeMenu;
+use eshark\ShadeMenu\ShadeMenu;
 
 AppAsset::register($this);
 ?>
@@ -94,7 +94,9 @@ AppAsset::register($this);
             if(FALSE!==Tickets::getUserOpRights())  
                 $reportsitms[] =  [ 'caption'=>'Журнал экспорта в систему ИТЕРА',   'href'=>'reports/iteralog', ];
 
-            $menuitms = [];
+            $menuitms = [
+                [ 'caption' => "Главная", 'href' => "site/index", ]
+            ];
 
             if( 
                 (FALSE !== strpos($uoprights['oprights'],'D')) || 

@@ -33,7 +33,3 @@ phpunit.phar
 
 # vagrant runtime
 /.vagrant
-
-# sublim project
-*.sublime-project
-*.sublime-workspace

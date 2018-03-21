@@ -1,6 +1,6 @@
 <?php
 
-namespace components\ShadeMenu;
+namespace eshark\ShadeMenu;
  
 use Yii;
 use yii\base\Widget;

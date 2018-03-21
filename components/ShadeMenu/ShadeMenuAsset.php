@@ -1,5 +1,5 @@
 <?php
-namespace components\ShadeMenu;
+namespace eshark\ShadeMenu;
 
 use yii\web\AssetBundle;
 
