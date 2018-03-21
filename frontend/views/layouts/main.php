@@ -75,51 +75,51 @@ AppAsset::register($this);
         ]) ?>
         <?= Alert::widget() ?>
 
-
-        <?php //$this->registerCssFile('css/left-nav-style.css'); ?>
         <?php
-            $reportsitms=[
-                [ 'caption' => 'Список Заявок',                             'href' => 'reports/ticketslist', ],
-                [ 'caption' => 'Отчет по выполнению заявок',                'href' => 'reports/titotals', ],
-                [ 'caption' => 'Отчет по неработающим лифтам',              'href' => 'reports/oosnow', ],
-                [ 'caption' => 'Отчет по повторным заявкам',                'href' => 'reports/repfailures', ],
-                [ 'caption' => 'Отчет по поступлению заявок по дням',       'href' => 'reports/tiperday', ],
-                [ 'caption' => 'Отчет по поступлению заявок по месяцам',    'href' => 'reports/tipermonth', ],
-                [ 'caption' => 'Работа Аварийной Службы',                   'href' => 'reports/tilas', ],
-                [ 'caption' => 'Отчет по выполнению заявок 1562',           'href' => 'reports/titotals1562', ],
-                [ 'caption' => 'Список остановленных и запущенных лифтов',  'href' => 'reports/stopped-list', ],
-                [ 'caption' => 'Количество остановленных лифтов по районам','href' => 'reports/stopped-sum', ],
-                [ 'caption' => 'Отчет по количеству остановленных лифтов',  'href' => 'reports/stopped-count', ],
-            ];
-            if(FALSE!==Tickets::getUserOpRights())  
-                $reportsitms[] =  [ 'caption'=>'Журнал экспорта в систему ИТЕРА',   'href'=>'reports/iteralog', ];
+            if (!Yii::$app->user->isGuest) {
+                $reportsitms=[
+                    [ 'caption' => 'Список Заявок',                             'href' => 'reports/ticketslist', ],
+                    [ 'caption' => 'Отчет по выполнению заявок',                'href' => 'reports/titotals', ],
+                    [ 'caption' => 'Отчет по неработающим лифтам',              'href' => 'reports/oosnow', ],
+                    [ 'caption' => 'Отчет по повторным заявкам',                'href' => 'reports/repfailures', ],
+                    [ 'caption' => 'Отчет по поступлению заявок по дням',       'href' => 'reports/tiperday', ],
+                    [ 'caption' => 'Отчет по поступлению заявок по месяцам',    'href' => 'reports/tipermonth', ],
+                    [ 'caption' => 'Работа Аварийной Службы',                   'href' => 'reports/tilas', ],
+                    [ 'caption' => 'Отчет по выполнению заявок 1562',           'href' => 'reports/titotals1562', ],
+                    [ 'caption' => 'Список остановленных и запущенных лифтов',  'href' => 'reports/stopped-list', ],
+                    [ 'caption' => 'Количество остановленных лифтов по районам','href' => 'reports/stopped-sum', ],
+                    [ 'caption' => 'Отчет по количеству остановленных лифтов',  'href' => 'reports/stopped-count', ],
+                ];
+                if(FALSE!==Tickets::getUserOpRights())  
+                    $reportsitms[] =  [ 'caption'=>'Журнал экспорта в систему ИТЕРА',   'href'=>'reports/iteralog', ];
 
-            $menuitms = [
-                [ 'caption' => "Главная", 'href' => "site/index", ]
-            ];
+                $menuitms = [
+                    [ 'caption' => "Главная", 'href' => "site/index", ]
+                ];
 
-            if( 
-                (FALSE !== strpos($uoprights['oprights'],'D')) || 
-                (FALSE !== strpos($uoprights['oprights'],'d')) ||
-                (FALSE !== strpos($uoprights['oprights'],'M')) ||
-                (FALSE !== strpos($uoprights['oprights'],'F')) ){
-                $menuitms[] = [ 'caption' => YII::t('app','Tickets'), 'href' => "tickets/index", ];
+                if( 
+                    (FALSE !== strpos($uoprights['oprights'],'D')) || 
+                    (FALSE !== strpos($uoprights['oprights'],'d')) ||
+                    (FALSE !== strpos($uoprights['oprights'],'M')) ||
+                    (FALSE !== strpos($uoprights['oprights'],'F')) ){
+                    $menuitms[] = [ 'caption' => YII::t('app','Tickets'), 'href' => "tickets/index", ];
+                }
+
+                if( FALSE !== strpos($uoprights['oprights'],'D' ) ) {
+                    $menuitms[] = [ 'caption' => YII::t('app','Ticket input'), 'href' => "ticket-input/inputform", ];
+                } 
+
+                if( FALSE === strpos($uoprights['oprights'],'F' ) ) {
+                    $menuitms[] = [ 'caption' => YII::t('app','Reports'), 'items' => $reportsitms, ];
+                    $menuitms[] = [ 'caption' => YII::t('app','Map'),     'href' => "maps/index", ];
+                }
+
+                echo ShadeMenu::widget([
+                    'caption'=>"МЕНЮ",
+                    'items'=>$menuitms,
+                    'options'=>[],
+                ]);
             }
-
-            if( FALSE !== strpos($uoprights['oprights'],'D' ) ) {
-                $menuitms[] = [ 'caption' => YII::t('app','Ticket input'), 'href' => "ticket-input/inputform", ];
-            } 
-
-            if( FALSE === strpos($uoprights['oprights'],'F' ) ) {
-                $menuitms[] = [ 'caption' => YII::t('app','Reports'), 'items' => $reportsitms, ];
-                $menuitms[] = [ 'caption' => YII::t('app','Map'),     'href' => "maps/index", ];
-            }
-
-            echo ShadeMenu::widget([
-                'caption'=>"МЕНЮ",
-                'items'=>$menuitms,
-                'options'=>[],
-            ]);
         ?>
         <?= $content ?>
     </div>

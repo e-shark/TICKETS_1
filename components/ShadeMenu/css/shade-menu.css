@@ -185,6 +185,10 @@ body {
       width: 100%;
       box-shadow: none
     }
+    [id='rep-nav-toggle']:checked ~ .rep-nav > .rep-nav-toggle {
+        left: auto;
+        top: 1em;
+    }
 }
 
 
