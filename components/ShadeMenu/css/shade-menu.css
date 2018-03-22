@@ -171,22 +171,27 @@ body {
     html,
     body {
       margin: 0;
-/*      overflow-x: hidden; */
+     /* overflow-x: hidden; */
     }
 }
 
 @media screen and (max-width: 320px) {
+/*  
+*/  
     html,
     body {
       margin: 0;
-      overflow-x: hidden;
+/*      overflow-x: hidden; */
     }
+    /*
     .rep-nav {
       width: 100%;
       box-shadow: none
     }
+    */
+
     [id='rep-nav-toggle']:checked ~ .rep-nav > .rep-nav-toggle {
-        left: auto;
+        right: 450px;
         top: 1em;
     }
 }
