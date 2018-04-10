@@ -71,9 +71,9 @@ class TicketInputController extends Controller
         return $res;
     }
 
-    public function actionGetEntranceWithElevators($FacilityId = 0)
+    public function actionGetEntranceWithElevators($FacilityId = 0, $ObjectId = '000')
     {
-        return TicketInputForm::getEntranceWithElevators($FacilityId);
+        return TicketInputForm::getEntranceWithElevators($FacilityId, $ObjectId);
     }
 
     public function actionGetElevatorsList()
@@ -84,7 +84,11 @@ class TicketInputController extends Controller
             if (! empty($data)){
                 $FacilityId =  0 + $data['FacilityId'];
                 $EntranceId = 0 +  $data['EntranceId'];
-                $res = json_encode(TicketInputForm::getElevatorsList($FacilityId, $EntranceId));
+                $ObjectId = $data['ObjectId'];
+                if ('001'==$ObjectId)
+                  $res = json_encode(TicketInputForm::getElevatorsList($FacilityId, $EntranceId));
+                else
+                  $res = json_encode(TicketInputForm::getSwichboardList($FacilityId, $EntranceId));
             }
         }
         return $res;
@@ -98,7 +102,8 @@ class TicketInputController extends Controller
             $data = Yii::$app->request->post();
             if (! empty($data)){
                 $ElevatorId =  0 + $data['ElevatorId'];
-                $res = TicketInputForm::getElevatorDivision($ElevatorId);
+                $ObjectId = $data['ObjectId'];
+                $res = TicketInputForm::getElevatorDivision($ElevatorId,$ObjectId);
             }
         }
         return json_encode($res);
@@ -160,7 +165,7 @@ class TicketInputController extends Controller
                 $Ticket->tiresulterrorcode = NULL;
                 $Ticket->tiresulterrortext = NULL;
 
-                $Ticket->fillElevatorDivision($data['tiElevator']);
+                $Ticket->fillElevatorDivision($data['tiElevator']); // заполняет tidivision_id и tiobjectcode по id лифта ElevatorID из tiElevator
                 //$Ticket->tiobjectcode = инв. номер по $data['tiElevator'];
                 //$Ticket->tidivision_id = $data[''];
                 //$Ticket->tiexecutant_id = $data[''];
@@ -177,6 +182,35 @@ class TicketInputController extends Controller
                         $Ticket->tidesk_id = $data['tiDepSelect']; 
                     }
                     $SMSReciver = TicketAddData::getDivisionMasterId($Ticket->tidesk_id);
+                }
+                switch($data['DivisionType']){
+                    case 0:  // Задано подразделение для лифта
+                    case 3:  // Задано подразделение ВДЭС
+                        $Ticket->tidesk_id = $Ticket->tidivision_id; 
+                        $SMSReciver = TicketAddData::getDivisionMasterId($Ticket->tidesk_id);
+                        break;
+
+                    case 2:  // из списка лифтовых подразделений
+                        $Ticket->tidesk_id = $data['tiDepSelect']; 
+                        $SMSReciver = TicketAddData::getDivisionMasterId($Ticket->tidesk_id);
+                        break;
+
+                    case 1:  // из списка ЛАС лифтеров
+                        $Ticket->tiexecutant_id = $data['tiExecutant'];
+                        $Ticket->tidesk_id = $Ticket->tioriginatordesk_id; 
+                        $SMSReciver = $Ticket->tiexecutant_id;
+                        break;
+
+                    case 5:  // из списка подразделений ВДЭС
+                        $Ticket->tidesk_id = $data['tiVDESDepSelect']; 
+                        $SMSReciver = TicketAddData::getDivisionMasterId($Ticket->tidesk_id);
+                        break;
+
+                    case 4:  // из списка ЛАС ВДЭС
+                        $Ticket->tiexecutant_id = $data['tiVDESExecutant'];
+                        $Ticket->tidesk_id = $Ticket->tioriginatordesk_id; 
+                        $SMSReciver = $Ticket->tiexecutant_id;
+                        break;
                 }
 
                 $tiid = $Ticket->TicketAddNew();

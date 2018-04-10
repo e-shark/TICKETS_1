@@ -20,6 +20,7 @@ return[
 'Apartment' => 'Квартира',
 'Written appeal' => 'Письменное обращение',
 'Priority' => 'Приоритет',
+'Panel' => 'Щитовая',
 'Elevator' => 'Лифт',
 'Executant' => 'Исполнитель',
 'Details' => 'Подробности',

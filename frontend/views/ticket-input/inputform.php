@@ -12,6 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php echo Html::beginForm(['ticket-add'],'post'); 
       echo Html::hiddenInput('tiStatus', 'DISPATCHER_ASSIGN');
       echo Html::hiddenInput('DivisionType', 1);    //0-подразделение лифта 1-ЛАС 2-из списка
+                                                    //3-подразделение ВДЭС  4-ЛАС ВДЭС 5-из списка ВДЭС
 
 ?>
 
@@ -41,7 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
       <div class="row">
         <div class="col-md-2">
-          <?php echo Html::label(Yii::t('ticketinputform','Problem')); ?>
+          <?php //echo Html::label(Yii::t('ticketinputform','Problem')); ?>
+          <?php echo Html::label("Причина<br>обращения"); ?>
         </div>
         <div class="col-md-8" id='divProblemSelect' onChange='onSelectProblem()'>
           <?php //echo Html::dropDownList('tiProblem', 'null', ArrayHelper::map($model->tiProblems,'tiproblemtypecode','tiproblemtypetext'),['id'=>'ProblemSelect','class'=>'form-control']); ?> 
@@ -164,7 +166,7 @@ $this->params['breadcrumbs'][] = $this->title;
       </div>
 
       <div class="row" id='divElevatorSelectRow'>
-        <div class="col-md-2">
+        <div class="col-md-2" id='divElevatorSelectCaption'>
           <?php echo Html::label(Yii::t('ticketinputform','Elevator')); ?>
         </div>
         <div class="col-md-6" id='divElevatorSelect'>
@@ -198,7 +200,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                           'CONTROL2'=>Yii::$app->params['TicketPriority']['CONTROL2'],
                                           'EMERGENCY'=>Yii::$app->params['TicketPriority']['EMERGENCY'],
                                         ],
-                                        ['id'=>'PrioritySelect','class'=>'form-control']);//,'onChange'=>'onSelectObject()']); 
+                                        ['id'=>'PrioritySelect','class'=>'form-control','onChange'=>'onSelectPriority()']); 
           ?> 
         </div>
       </div>      
@@ -223,7 +225,23 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-4" id="divExecutantDep">
         </div>
         <div class="col-md-4" id="divExecutantDepsList">
-         <?php echo Html::dropDownList('tiDepSelect','null',ArrayHelper::map($model->tiDepsList,'id','divisionname'),['id'=>'tiDepSelect','class'=>'form-control']); ?>
+          <?php echo Html::dropDownList('tiDepSelect','null',ArrayHelper::map($model->tiDepsList,'id','divisionname'),['id'=>'tiDepSelect','class'=>'form-control']); ?>
+        </div>
+
+        <div class="col-md-4" id="divVDESExecutantLas">
+          <?php 
+             echo Select2Widget::widget(
+                [
+                  'id' => 'tiVDESExecutantSelectt',
+                  'name' => 'tiVDESExecutant',
+                  'items'=> ArrayHelper::map($model->getExecutantsListVDESForLAS(), 'id','text'),
+                  'settings' => [ 'width' => '100%' ],                 
+                ]
+          );      
+          ?>
+        </div>
+        <div class="col-md-4" id="divVDESExecutantDepsList">
+          <?php echo Html::dropDownList('tiVDESDepSelect','null',ArrayHelper::map($model->getDivisionsListVDESForMaster(),'id','divisionname'),['id'=>'tiDepSelect','class'=>'form-control']); ?>
         </div>
       </div>
 
@@ -261,6 +279,9 @@ $str1 = '"'.Yii::t('ticketinputform','Transfer to LAS').'"';
 $str2 = '"'.Yii::t('ticketinputform','Transfer to mster').'"';
 $str3 = "'".Html::input('text','tiEntrance','',['id'=>'tiEntranceInput','class'=>'form-control'])."'";
 
+$strElCapElevator = Html::label(Yii::t('ticketinputform','Elevator'));
+$strElCapPanel = Html::label(Yii::t('ticketinputform','Panel'));
+
 $script = <<< JS
 
 $(window).load(function () {
@@ -270,12 +291,21 @@ $(window).load(function () {
   CheckForLasNeeded();
 });
 
+function LoadExecutants(){
+
+}
 
 function CheckElevatorInputNeeded(){
-  if ($("#ObjectsSelect").val() == 1){
+  if ($("#ObjectsSelect").val() < 3){
     $("#divElevatorSelectRow").show();
     $("#divApartment").hide();
     //$("#divEntrance").hide();
+    if ($("#ObjectsSelect").val() == 1){
+      $("#divElevatorSelectCaption").html("$strElCapElevator");
+    }else{
+      $("#divElevatorSelectCaption").html("$strElCapPanel");
+    }
+
     ElevatorSelectUpdate();
   }else{
     $("#divElevatorSelectRow").hide();
@@ -285,59 +315,82 @@ function CheckElevatorInputNeeded(){
 }
 
 function CheckForLasNeeded(){
-  if ( (1 == $("#ObjectsSelect").val()) && (1 == $("#ProblemSelect").val()) ) {  
-      $("#divExecutantLas").show();
-      $( "input[name$='DivisionType']" ).val( 1 );
-      $("#divExecutantDep").hide();
-      $("#divExecutantDepsList").hide();
-      $("#SubmitButton").html($str1);
-  }else{
-    var date = new Date();
-    var hour = date.getHours() ;
-    if ((hour<8) || (hour>16)){
+  if (1 == $("#ObjectsSelect").val()) {
+    // если объект - лифты
+    $("#divVDESExecutantLas").hide();
+    $("#divVDESExecutantDepsList").hide();
+    if ( 1 == $("#ProblemSelect").val() ) {  
         $("#divExecutantLas").show();
         $( "input[name$='DivisionType']" ).val( 1 );
         $("#divExecutantDep").hide();
         $("#divExecutantDepsList").hide();
         $("#SubmitButton").html($str1);
     }else{
-        $("#divExecutantLas").hide();
-
-        var ElevatorsNumber = document.getElementById("tiElevatorSelect").options.length;
-
-        if (ElevatorsNumber>0){
-          $( "input[name$='DivisionType']" ).val( 0 );
-          $("#divExecutantDepsList").hide();
-          $("#divExecutantDep").show();
-        }else{
-          $( "input[name$='DivisionType']" ).val( 2 );
-          $("#divExecutantDepsList").show();
+      var date = new Date();
+      var hour = date.getHours() ;
+      if ((hour<8) || (hour>16)){
+          $("#divExecutantLas").show();
+          $( "input[name$='DivisionType']" ).val( 1 );
           $("#divExecutantDep").hide();
-        }
+          $("#divExecutantDepsList").hide();
+          $("#SubmitButton").html($str1);
+      }else{
+          $("#divExecutantLas").hide();
+
+          var ElevatorsNumber = document.getElementById("tiElevatorSelect").options.length;
+
+          if (ElevatorsNumber>0){
+            $( "input[name$='DivisionType']" ).val( 0 );
+            $("#divExecutantDepsList").hide();
+            $("#divExecutantDep").show();
+          }else{
+            $( "input[name$='DivisionType']" ).val( 2 );
+            $("#divExecutantDepsList").show();
+            $("#divExecutantDep").hide();
+          }
 
 
-        $("#SubmitButton").html($str2);
+          $("#SubmitButton").html($str2);
+      }
     }
+  }else{
+    // если объект - не лифты
+    $("#divExecutantDep").hide();
+    $("#divExecutantDepsList").hide();
+    $("#divExecutantLas").hide();
+    //console.log($("#PrioritySelect").val());
+
+    if ( $("#PrioritySelect").val() == 'EMERGENCY') {
+      // срочная заявка
+      $("#divVDESExecutantLas").show();
+      $("#divVDESExecutantDepsList").hide();
+      $("#SubmitButton").html($str1);
+      $( "input[name$='DivisionType']" ).val( 4 );
+    }else{
+      $("#SubmitButton").html($str2);
+      $("#divVDESExecutantLas").hide();        
+      //$("#divVDESExecutantDepsList").show();
+      var PanelsNumber = document.getElementById("tiElevatorSelect").options.length;
+      if (PanelsNumber>0){
+        $("#divVDESExecutantDepsList").hide();
+        $("#divExecutantDep").show();
+        $( "input[name$='DivisionType']" ).val( 3 );
+      }else{
+        $("#divVDESExecutantDepsList").show();
+        $("#divExecutantDep").hide();
+        $( "input[name$='DivisionType']" ).val( 5 );
+      }
+
+    }   
+      
   }
+
 }
 
-function onSelectRegion(){
-    $.ajax({
-         url: '$addr1',
-         type: "POST",
-         dataType: "json",
-         data: {District: $("#tiRegionSelect").val()},
-         success: function(datamas) {
-                $("#tiStreetSelect").html("");
-                $("#tiStreetSelect").select2({data:datamas, width:'100%'});
-         },
-         error:   function() {
-                $("#tiStreetSelect").html('AJAX error!');
-         }
-
-  });
-  return false;
+function onSelectPriority() {
+  CheckForLasNeeded();
 }
+
 
 
 function onSelectStreet(){
@@ -353,6 +406,25 @@ function onSelectStreet(){
          },
          error:   function() {
                 $("#tiFacilitySelect").html('AJAX error!');
+         }
+
+  });
+  return false;
+}
+
+function onSelectRegion(){
+    $.ajax({
+         url: '$addr1',
+         type: "POST",
+         dataType: "json",
+         data: {District: $("#tiRegionSelect").val()},
+         success: function(datamas) {
+                $("#tiStreetSelect").html("");
+                $("#tiStreetSelect").select2({data:datamas, width:'100%'});
+                onSelectStreet();
+         },
+         error:   function() {
+                $("#tiStreetSelect").html('AJAX error!');
          }
 
   });
@@ -383,6 +455,7 @@ function onSelectObject(){
 
 
     });
+    CheckForLasNeeded();
     return false;
 }
 
@@ -393,7 +466,8 @@ function ElevatorSelectUpdate(){
          dataType: "json",
          data: {
             FacilityId: $("#tiFacilitySelect").val(),
-            EntranceId: $("#tiEntranceInput").val()
+            EntranceId: $("#tiEntranceInput").val(),
+            ObjectId: $("#ObjectsSelect").val()
          },
          success: function(datamas) {
                 $("#divElevatorSelect").html(datamas['Elevators']);
@@ -407,11 +481,14 @@ function ElevatorSelectUpdate(){
   });
 }
 
+// обновление списка подъездов в доме
 function EntranceSelectUpdate(){
-    if (1 == $("#ObjectsSelect").val()) {  
+    if ('XXX' !== $("#ObjectsSelect").val())                  // просто убрал проверку
+    {  
         $.ajax({
              url: '$addr6',
-             data: {FacilityId: $("#tiFacilitySelect").val()},
+             data: {FacilityId: $("#tiFacilitySelect").val(), 
+                    ObjectId: $("#ObjectsSelect").val()},
              success: function(datamas) {
                     $("#divEntranceInput").html(datamas);
                     ElevatorSelectUpdate();
@@ -440,7 +517,8 @@ function GetElDivision(){
          url: '$addr5',
          type: "POST",
          dataType: "json",
-         data: {ElevatorId: $("#tiElevatorSelect").val()},
+         data: {ElevatorId: $("#tiElevatorSelect").val(),
+                ObjectId: $("#ObjectsSelect").val()},
          success: function(datamas) {
                 $("#divExecutantDep").html(datamas['DivName']);
          },

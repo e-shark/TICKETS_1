@@ -51,7 +51,7 @@ class TicketInputForm extends Model
 
 	public static function getFacilitysList( $StreetID = 0)
 	{
-		$vStreets =  Yii::$app->db->createCommand('SELECT facility.id, facility.faaddressno as text FROM street join facility on   fastreet_id = street.id where street.id ='.$StreetID.';')->queryAll();	
+		$vStreets =  Yii::$app->db->createCommand('SELECT facility.id, coalesce(concat(faaddressno," ","сек.",fasectionno),faaddressno) as text FROM street join facility on   fastreet_id = street.id where street.id ='.$StreetID.';')->queryAll();	
 		return $vStreets;
 	}
 
@@ -63,10 +63,9 @@ class TicketInputForm extends Model
 		return $res;
 	}
 
-	public static function getEntranceWithElevators( $FacilityId = 0)
+	public static function getEntranceWithElevators( $FacilityId = 0, $ObjectId = '000')
 	{
-   		//$Sel =  Yii::$app->db->createCommand('SELECT  elporchno as id, concat("П. ", ifnull(elporchno,"")) as text FROM elevator WHERE elfacility_id = :fid group by elporchno;')->bindValues([':fid'=>$FacilityId])->queryAll();		
-   		$Sel =  Yii::$app->db->createCommand('SELECT  elporchno as id, elporchno as text FROM elevator WHERE elfacility_id = :fid group by elporchno;')->bindValues([':fid'=>$FacilityId])->queryAll();		
+   		$Sel =  Yii::$app->db->createCommand('SELECT  elporchno as id, elporchno as text FROM elevator e left join ticketobject o on e.eldevicetype = o.tiobjectdevicetype WHERE elfacility_id = :fid and o.tiobjectcode = :objid group by elporchno;')->bindValues([':fid'=>$FacilityId, ':objid'=>$ObjectId])->queryAll();		
    		$cnt = count($Sel);
    		if ($cnt > 0){
    			if (1 == $cnt){
@@ -83,8 +82,15 @@ class TicketInputForm extends Model
 
 	public static function getElevatorsList( $FacilityId = 0, $EntranceId=0)
 	{
-		$Elevators =  Yii::$app->db->createCommand('SELECT id, concat(ifnull(elporchpos,"")," ", ifnull(eltype,"")) as text FROM elevator WHERE elfacility_id = '.$FacilityId.' and elporchno = '.$EntranceId.';')->queryAll();
+		$Elevators =  Yii::$app->db->createCommand('SELECT id, concat(ifnull(elporchpos,"")," ", ifnull(eltype,"")) as text FROM elevator WHERE elfacility_id = '.$FacilityId.' and elporchno = '.$EntranceId.' and eldevicetype = 1;')->queryAll();
+		$res['Elevators'] = Html::dropDownList('tiElevator', 'null', ArrayHelper::map($Elevators,'id','text'),['id'=>'tiElevatorSelect','class'=>'form-control','onChange'=>'onSelectElevator()']);
+		$res['ElNum'] = count($Elevators);
+		return $res;
+	}
 
+	public static function getSwichboardList( $FacilityId = 0, $EntranceId=0)
+	{
+		$Elevators =  Yii::$app->db->createCommand('SELECT id, concat("№",ifnull(elinventoryno,"")) as text FROM elevator WHERE elfacility_id = '.$FacilityId.' and elporchno = '.$EntranceId.' and eldevicetype = 10;')->queryAll();
 		$res['Elevators'] = Html::dropDownList('tiElevator', 'null', ArrayHelper::map($Elevators,'id','text'),['id'=>'tiElevatorSelect','class'=>'form-control','onChange'=>'onSelectElevator()']);
 		$res['ElNum'] = count($Elevators);
 		return $res;
@@ -106,14 +112,30 @@ class TicketInputForm extends Model
 
 	public static function getDivisionsListForMaster()
 	{
-    	$divigions = Yii::$app->db->createCommand('select d.id,d.divisionname from employee e join division d on e.division_id=d.id where e.oprights like"%M%";')->queryAll();
+    	$divigions = Yii::$app->db->createCommand('SELECT d.id,d.divisionname from employee e join division d on e.division_id=d.id where e.oprights like"%M%" and d.divisioncodesvc like "%L%";')->queryAll();
 		return  $divigions;
 	}
 
-	public static function getElevatorDivision($ElevatorId)
+    public static function getExecutantsListVDESForLAS()
+    {
+		$DivisionID =  Yii::$app->db->createCommand('SELECT id FROM division WHERE divisioncode = 12;')->queryOne()['id'];	
+        $res = Yii::$app->db->createCommand('SELECT id, concat( ifnull(lastname,"")," ",ifnull(firstname,"")," ",ifnull(patronymic,"")) as text FROM employee WHERE division_id = '.$DivisionID.' ORDER BY lastname;')->queryAll();			
+        return $res;
+    }
+
+	public static function getDivisionsListVDESForMaster()
+	{
+    	$divigions = Yii::$app->db->createCommand('SELECT d.id,d.divisionname from employee e join division d on e.division_id=d.id where e.oprights like"%M%" and d.divisioncodesvc like "%E%";')->queryAll();
+    	return  $divigions;
+	}
+
+
+	public static function getElevatorDivision($ElevatorId, $ObjectId)
 	{
 		$res=[];
-    	$eldivigion = Yii::$app->db->createCommand('SELECT elevator.id, elevator.eldivision_id, division.id as divid, division.divisionname as divname FROM elevator join division on elevator.eldivision_id = division.id where elevator.id = '.$ElevatorId.';')->queryOne();
+		$devtype = 'E';
+		if ('002'==$ObjectId) $devtype = 'L';
+    	$eldivigion = Yii::$app->db->createCommand('SELECT elevator.id, elevator.eldivision_id, division.id as divid, division.divisionname as divname FROM elevator join division on elevator.eldivision_id = division.id where elevator.id = '.$ElevatorId.' ;')->queryOne();
     	if (!is_null( $eldivigion['divid'])) {$res['DivId'] = $eldivigion['divid'];}
     	if (!is_null( $eldivigion['divname'])) {$res['DivName'] = $eldivigion['divname'];}
     	else {$res['DivName'] = "";}
