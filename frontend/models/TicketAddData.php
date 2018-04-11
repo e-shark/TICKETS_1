@@ -126,7 +126,7 @@ class TicketAddData extends Model
 
     public function ExportLog($tiid)
     {
-        TicketAction::exportLog($tiid, $this->tistatus, $this->tioriginator_id, NULL, true);
+        TicketAction::exportIteraLog($tiid, $this->tistatus, $this->tioriginator_id, $this->tiexecutant_id, NULL, true);
     }
 
 	public static function getGetTicketId()

@@ -241,7 +241,10 @@ $this->params['breadcrumbs'][] = $this->title;
           ?>
         </div>
         <div class="col-md-4" id="divVDESExecutantDepsList">
-          <?php echo Html::dropDownList('tiVDESDepSelect','null',ArrayHelper::map($model->getDivisionsListVDESForMaster(),'id','divisionname'),['id'=>'tiDepSelect','class'=>'form-control']); ?>
+          <?php echo Html::dropDownList('tiVDESDepSelect','null',ArrayHelper::map($model->getDivisionsListVDESForMaster(),'id','divisionname'),['id'=>'tiVDESDepSelect','class'=>'form-control','onChange'=>'OnSelectDep()']); ?>
+        </div>
+        <div class="col-md-4" id="divNoExecutantWarning" style="color:red;" hidden>
+          Необходимо выбрать подразделение!
         </div>
       </div>
 
@@ -283,6 +286,8 @@ $strElCapElevator = Html::label(Yii::t('ticketinputform','Elevator'));
 $strElCapPanel = Html::label(Yii::t('ticketinputform','Panel'));
 
 $script = <<< JS
+
+var DivId = null;
 
 $(window).load(function () {
   onSelectRegion();
@@ -366,10 +371,18 @@ function CheckForLasNeeded(){
       $("#divVDESExecutantDepsList").hide();
       $("#SubmitButton").html($str1);
       $( "input[name$='DivisionType']" ).val( 4 );
+      HideTransparencyNoExecutant();
+
+
     }else{
       $("#SubmitButton").html($str2);
       $("#divVDESExecutantLas").hide();        
-      //$("#divVDESExecutantDepsList").show();
+
+      $("#divVDESExecutantDepsList").show();
+      $( "input[name$='DivisionType']" ).val( 5 );
+
+      DoSelectDep();
+    /*
       var PanelsNumber = document.getElementById("tiElevatorSelect").options.length;
       if (PanelsNumber>0){
         $("#divVDESExecutantDepsList").hide();
@@ -380,6 +393,7 @@ function CheckForLasNeeded(){
         $("#divExecutantDep").hide();
         $( "input[name$='DivisionType']" ).val( 5 );
       }
+      */
 
     }   
       
@@ -390,8 +404,6 @@ function CheckForLasNeeded(){
 function onSelectPriority() {
   CheckForLasNeeded();
 }
-
-
 
 function onSelectStreet(){
     $.ajax({
@@ -511,6 +523,44 @@ function onSelectEntrance(){
   ElevatorSelectUpdate();
 }
 
+function ShowTransparencyNoExecutant(){
+  if (1 != $("#ObjectsSelect").val()) {
+    if ( $("#PrioritySelect").val() != 'EMERGENCY') {
+      $("#divNoExecutantWarning").show();
+      $("#SubmitButton").attr('disabled', 'disabled');
+    }
+  }  
+}
+
+function HideTransparencyNoExecutant(){
+    $("#divNoExecutantWarning").hide();
+    $("#SubmitButton").removeAttr('disabled');
+}
+
+function OnSelectDep(){
+  HideTransparencyNoExecutant();
+  DivId = $("#tiVDESDepSelect").val();
+}
+
+// выбрать пункт в выпадающем списке выбора исполнителя
+function DoSelectDep(){
+  if (1 == $("#ObjectsSelect").val()) {
+    // если объект - лифты
+    $("#tiDepSelect").val(DivId)
+    $("#divNoExecutantWarning").hide();
+    $("#SubmitButton").removeAttr('disabled');
+  }else{
+    // если объект - не лифты
+    $("#tiVDESDepSelect").val(DivId)
+    if (DivId == null) {
+      console.log("NoDivId");
+      ShowTransparencyNoExecutant();
+    }else{
+      HideTransparencyNoExecutant();
+    }
+  }
+
+}
 
 function GetElDivision(){
     $.ajax({
@@ -521,6 +571,8 @@ function GetElDivision(){
                 ObjectId: $("#ObjectsSelect").val()},
          success: function(datamas) {
                 $("#divExecutantDep").html(datamas['DivName']);
+                DivId = datamas['DivId'];
+                DoSelectDep();
          },
          error:   function() {
                 $("#divExecutanDep").html('AJAX error!');

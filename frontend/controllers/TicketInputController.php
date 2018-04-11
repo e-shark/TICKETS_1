@@ -171,21 +171,8 @@ class TicketInputController extends Controller
                 //$Ticket->tiexecutant_id = $data[''];
 
                 //if ((!$Ticket::isWorkTime()) ) {
-                if (1 == $data['DivisionType']) {
-                    $Ticket->tiexecutant_id = $data['tiExecutant'];
-                    $Ticket->tidesk_id = $Ticket->tioriginatordesk_id; 
-                    $SMSReciver = $Ticket->tiexecutant_id;
-                } else{
-                    if (0 == $data['DivisionType']) {
-                        $Ticket->tidesk_id = $Ticket->tidivision_id; 
-                    }else{
-                        $Ticket->tidesk_id = $data['tiDepSelect']; 
-                    }
-                    $SMSReciver = TicketAddData::getDivisionMasterId($Ticket->tidesk_id);
-                }
                 switch($data['DivisionType']){
                     case 0:  // Задано подразделение для лифта
-                    case 3:  // Задано подразделение ВДЭС
                         $Ticket->tidesk_id = $Ticket->tidivision_id; 
                         $SMSReciver = TicketAddData::getDivisionMasterId($Ticket->tidesk_id);
                         break;
@@ -201,6 +188,7 @@ class TicketInputController extends Controller
                         $SMSReciver = $Ticket->tiexecutant_id;
                         break;
 
+                    case 3:  // Задано подразделение ВДЭС
                     case 5:  // из списка подразделений ВДЭС
                         $Ticket->tidesk_id = $data['tiVDESDepSelect']; 
                         $SMSReciver = TicketAddData::getDivisionMasterId($Ticket->tidesk_id);

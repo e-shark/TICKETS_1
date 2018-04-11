@@ -36,19 +36,21 @@ class TicketAction extends Model
 	public $receiverId;		// got it from post only for case the foreman is current user, otherwise should get it from db
 
 	const LASDIVISION_ID = 8;
+	const LAS1DIVISION_ID = 12;	// LAS VDES
 
 	/**
 	 * Itera-machine
-	 * 1.Fills all actions as records to the exportlog table for further export its to external system by external  transmitter task.
+	 * 1.Fills all actions as records to the exportiteralog table for further export its to external system by external  transmitter task.
 	 * 2.Tries to immediately send messages to Itera
 	 * @param int ticket_id - ticket.id, should be valid id of ticket , otherwise function returns FALSE
 	 * @param string opstatus - the operation status string (like EXECUTANT_COMPLETE etc)
-	 * @param int person_id - should be valid employee.id, otherwise function returns FALSE
+	 * @param int person_id - should be valid employee.id, or NULL, the sender id -> ruser_id
+	 * @param int executant_id - should be valid employee.id, or NULL, the executant (or receiver id) ->rperformer_id
 	 * @param string comment - the string with comment to operation
 	 * @param boolean isnew - should be set to true if ticket is newly created one
 	 * @return mixed - FALSE on error, or int value, the exportiteralog.id - id of record inserted into exportiteralog
 	 */
-	public static function exportLog($ticket_id, $opstatus, $person_id,$comment,$isnew=false){
+	public static function exportIteraLog($ticket_id, $opstatus, $person_id,$executant_id,$comment,$isnew=false){
 		$CUDBG=false;	// set to debug curl
 		//--- To let writing to DB-Log without sending to Itera: 1.Set exportItera=No (frontend/config/params-local.php). 2.Do comment the string below
 		//if( FALSE===strpos(Yii::$app->params['exportItera'],'Yes' )) return; 
@@ -67,12 +69,14 @@ class TicketAction extends Model
 		//--- Get original ticket
 		if(!$ticket_id)			return FALSE;
 		if( FALSE==($dbticket=Yii::$app->db->createCommand("SELECT * FROM ticket left join oostype ON ticket.tioostype_id=oostype.id left join ticketproblemtype  ON ticket.tiproblemtype_id=ticketproblemtype.id where ticket.id=$ticket_id")->queryOne())) 	return FALSE;
-		if( FALSE == ($dbemployee = Yii::$app->db->createCommand("SELECT * FROM employee where id=$person_id")->queryOne())) return FALSE;
+
 
 		//--- Set original ticket fields:
 		$recordtime = date("Y-m-d H:i:s");
 		$ticode1562 = $dbticket['ticoderemote']; // 1562 number
+		$ticodelogged = $dbticket['ticode']; 	 // latch the original ticket number,save it for case if for some reasons (errors) it will be modified in db
 		$isnew=$isnew?1:null;
+		$tistatusloggedtext = Yii::$app->params['TicketStatus'][ $opstatus ];
 		//--- Set fields for external system (Itera)
 		$iterastates=[
 			1=>"НОВАЯ",2=>"ОТКЛОНЕНА",3=>"ОТКЛОНЕНА (Подтв.)",5=>"РАСПРЕДЕЛЕНА",9=>"В РАБОТЕ",10=>"ОЖИДАЕТ ЗЧ",11=>"ЗАКРЫТА",12=>"ЗАКРЫТА (Подтв.)",13=>"РАБОТА ОКОНЧЕНА"
@@ -122,15 +126,29 @@ class TicketAction extends Model
 		$rturnon_plan_time=$dbticket['tiplannedtimenew'];
 		$rturnon_time=$dbticket['tioosend'];
 
-		//--- Set performer id
-		$rperformer_id = $dbemployee['remoteid'];
-		$division_id   = $dbemployee['division_id'];
-		$isfitter      = (FALSE!==strpos($dbemployee['oprights'],'F'))?TRUE:FALSE;
-		if( $isfitter ) {
-			if($division_id==self::LASDIVISION_ID);	// should replace this on Master or Dispatcher Id, but after the understanding where to seek it
-			else $rperformer_id = Yii::$app->db->createCommand("SELECT remoteid FROM employee where oprights like '%M%'and  division_id=$division_id")->queryOne()['remoteid'];
+		//--- Set Itera user_id
+		$ruser_id = 89;	// Диспетчер 1 (ХГЛ)
+		if(!empty($person_id))if( FALSE !== ($dbemployee = Yii::$app->db->createCommand("SELECT * FROM employee where id=$person_id")->queryOne())) {
+			$ruser_id = $dbemployee['remoteid'];
+			$division_id   = $dbemployee['division_id'];
+			$isfitter      = (FALSE!==strpos($dbemployee['oprights'],'F'))?TRUE:FALSE;
+			if( $isfitter ) {
+				if(($division_id==self::LASDIVISION_ID) OR ($division_id==self::LAS1DIVISION_ID));	// should replace this on Master or Dispatcher Id, but after the understanding where to seek it
+				else $ruser_id = Yii::$app->db->createCommand("SELECT remoteid FROM employee where oprights like '%M%'and  division_id=$division_id")->queryOne()['remoteid'];
+			}
 		}
-		if(empty($rperformer_id))$rperformer_id = 89;	// Диспетчер 1 (ХГЛ)
+		unset($dbemployee);unset($division_id);unset($isfitter);
+		//--- Set Itera performer id
+		$rperformer_id = $ruser_id;	
+		if(!empty($executant_id))if( FALSE !== ($dbemployee = Yii::$app->db->createCommand("SELECT * FROM employee where id=$executant_id")->queryOne())){ 
+			$rperformer_id = $dbemployee['remoteid'];
+			$division_id   = $dbemployee['division_id'];
+			$isfitter      = (FALSE!==strpos($dbemployee['oprights'],'F'))?TRUE:FALSE;
+			if( $isfitter ) {
+				if(($division_id==self::LASDIVISION_ID) OR ($division_id==self::LAS1DIVISION_ID));	// should replace this on Master or Dispatcher Id, but after the understanding where to seek it
+				else $rperformer_id = Yii::$app->db->createCommand("SELECT remoteid FROM employee where oprights like '%M%'and  division_id=$division_id")->queryOne()['remoteid'];
+			}
+		}
 		//--- Set description
 		$rdescription=	"1.".$dbticket['tiproblemtypetext']."\n".
 						"2.".$dbticket['tidescription']."\n".
@@ -148,7 +166,7 @@ class TicketAction extends Model
 if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 		$txattempts=1;	// here we will do the one attempt to tx the record, if it fails, then external transmitter will do the further tryes
 		$txcount=1;	// Will at least try to log in
-		$iteraAPIurl = $txrequest = "http://bsmart.itera.ws/Account/Login";
+		$iteraAPIurl = $txrequest = Yii::$app->params['urlItera']."/Account/Login";
 		$ch=curl_init($iteraAPIurl);
 		curl_setopt_array($ch,$curloptions+[
 			CURLOPT_HTTPHEADER=>["Referer: ".$iteraAPIurl],
@@ -169,7 +187,7 @@ if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 		//---(2) Try to ask Itera the remote ticket id, only if we have 1562 ticket and we yet not asked Itera
 		//$ticode1562='7543002';	//---Debugging
 		if( (!empty($ticode1562 )) AND empty($rticket_id)) { // it's 1562 ticket, trying to get its id from Itera or update remote info it we have it
-				$iteraAPIurl = "http://bsmart.itera.ws/ds/Ticket?filter(no)=equals($ticode1562)";
+				$iteraAPIurl = Yii::$app->params['urlItera']."/ds/Ticket?filter(no)=equals($ticode1562)";
 				//curl_reset($ch);
 				curl_setopt($ch, CURLOPT_URL, $iteraAPIurl);
 				curl_setopt_array($ch,$curloptions);
@@ -186,7 +204,7 @@ if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 
 		//---(3) Tx the ticket to Itera -> transmit all tickets exclude 1562, for which we failed to get the remote id
 		if( !(empty($rticket_id) AND (!empty($ticode1562 ))) ) {	// Do this for all tickets, EXCLUDING  1562 tickets with EMPTY rticket_id (from ITERA)
-			$iteraAPIurl = "http://bsmart.itera.ws/edt/Ticket/Post";	// New
+			$iteraAPIurl = Yii::$app->params['urlItera']."/edt/Ticket/Post";	// New
 			$postdata=[			
 				'@device_id'=>$rdevice_id,
 				'@malfunction_id'=>$rmalfunction_id,
@@ -196,6 +214,7 @@ if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 				'@turnon_plan_time'=>$rturnon_plan_time,
 				'@turnon_time'=>$rturnon_time,
 				'@description'=>$rdescription,
+				'@no'=>$ticodelogged,			// 180327-tx of original local ticket number,vpr
 				//'@created'=>$rcreated,
 			];
 			if(empty($ticode1562)) $postdata += ['@created'=>$rcreated];	// add creation time if it's not a 1562 ticket
@@ -204,6 +223,7 @@ if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 			}
 			else{								// Edit existing
 				$iteraAPIurl.="?id=$rticket_id";	
+				unset($postdata['@no']);
 				//unset($postdata['@device_id']);
 				//unset($postdata['@created']);
 			}
@@ -229,11 +249,13 @@ if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 
 			//---(4) Set new status for Itera ticket
 			if($irecUpdated)if(!empty($rticket_id)){
-				$iteraAPIurl = "http://bsmart.itera.ws/Ticket/SetStatus";	
+				$iteraAPIurl = Yii::$app->params['urlItera']."/Ticket/SetStatus";	
 				$postdata=[			
 					'ticket_id'=>$rticket_id,
 					'status_id'=>$rstatus_id,
 				];
+				if(!empty($tistatusloggedtext))	$postdata['description'] = $tistatusloggedtext;	// 11.04.2018,vpr
+				if(!empty($ruser_id))			$postdata['user_id'] = $ruser_id;				// 11.04.2018,vpr
 				curl_setopt_array($ch, $curloptions+[ 
 					CURLOPT_URL=>$iteraAPIurl,
 					CURLOPT_POST=>1,CURLOPT_POSTFIELDS=>$postdata
@@ -257,15 +279,19 @@ if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 }
 		//--- Try (again) to update remote status for all records of this ticket...
 		if(!empty($rticket_id))Yii::$app->db->createCommand("UPDATE exportiteralog set rticket_id=$rticket_id where ticket_id=$ticket_id")->execute();
-		//--- Write to exportLog
+		//--- Write to exportiteralog
 		Yii::$app->db->createCommand()->insert('exportiteralog',[
 			//'recordtime'=>$recordtime,	// server will set time
 			'ticket_id'=>$ticket_id,
+			'ticodelogged'=>$ticodelogged,
 			'tistatuslogged'=>$opstatus,
+			'tistatusloggedtext'=>$tistatusloggedtext,
 			'ticode1562'=>$ticode1562,
 			'isnew'=>$isnew,
 			'rstatus_id'=>$rstatus_id,
 			'person_id'=>$person_id,
+			'executant_id'=>$executant_id,
+			'ruser_id'=>$ruser_id,
 			'rperformer_id'=>$rperformer_id,
 			'rdevice_id'=>$rdevice_id,
 			'rmalfunction_id'=>$rmalfunction_id,
@@ -443,7 +469,7 @@ if( FALSE!==strpos(Yii::$app->params['exportItera'],'Yes' )) {
 			'tilreceiverdesk_id'=> $receiverdeskId
 			])->execute();
 		if( in_array( $this->tistatus,['MASTER_ASSIGN','MASTER_REASSIGN','DISPATCHER_ASSIGN','DISPATCHER_ASSIGN_MASTER','DISPATCHER_REASSIGN'] ) ) $this::sendSMS($executant, $this->senderId, $this->ticketId );
-		self::exportLog($this->ticketId,$this->tistatus,$this->senderId,$this->tiltext,false);
+		self::exportIteraLog($this->ticketId,$this->tistatus,$this->senderId,$this->receiverId,$this->tiltext,false);
 		return;
 	}
 	/**
