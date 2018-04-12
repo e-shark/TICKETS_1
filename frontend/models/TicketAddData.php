@@ -232,7 +232,9 @@ class TicketAddData extends Model
         $res = 259200;
         $ticrec = Yii::$app->db->createCommand('SELECT tiproblemrepairterm, tiproblemtypecode FROM  ticketproblemtype WHERE id=:PrblmID')->bindValues([':PrblmID' => $PrblmID])->queryOne();
         if (!empty($ticrec)){
-            $res = $ticrec['tiproblemrepairterm'];
+            if (!empty($ticrec['tiproblemrepairterm'])){
+                $res = $ticrec['tiproblemrepairterm'];
+            }
         }
         return $res;
     }
