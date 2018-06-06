@@ -156,7 +156,7 @@ class TicketAddData extends Model
 	public function isUserMaster()
     {
     	$useroprights = Tickets::getUserOpRights();
-    	if( $useroprights ) return (FALSE === strpos($useroprights['oprights'],'M') ) ? FALSE : TRUE;
+        if( $useroprights ) return ((FALSE === strpos($useroprights['oprights'],'M') )&&(FALSE === strpos($useroprights['oprights'],'m'))) ? FALSE : TRUE;
     	return FALSE;
     }    
 
