@@ -32,6 +32,7 @@ class TicketAddData extends Model
     public $tifacility_id;  // INT,     -- id of facility 
     public $tifacilitycode;	// CHAR(20), -- code of facility where incident took place (for example the building's inventory number)
     public $tiobjectcode;	// CHAR(20), -- code of object in which the incident took place (for example the elevator's inventory(or serial) number)
+    public $tiequipment_id; // INT, -- - id of object  in which the incident took place
     public $tiregion;	//  CHAR(50), -- code of region (or district) where the incident took place
     public $tiaddress;	//  VARCHAR(255), -- address string for the facility where incident took place
 
@@ -82,6 +83,7 @@ class TicketAddData extends Model
             'tifacility_id'   => $this->tifacility_id,
 			'tifacilitycode'  => $this->tifacilitycode,
 			'tiobjectcode'    => $this->tiobjectcode,
+            'tiequipment_id'  => $this->tiequipment_id,
 			'tiregion'        => $this->tiregion,
 			'tiaddress'       => $this->tiaddress,
 

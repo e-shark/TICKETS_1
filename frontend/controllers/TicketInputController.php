@@ -165,6 +165,7 @@ class TicketInputController extends Controller
                 $Ticket->tiresulterrorcode = NULL;
                 $Ticket->tiresulterrortext = NULL;
 
+                $Ticket->tiequipment_id = $data['tiElevator'];
                 $Ticket->fillElevatorDivision($data['tiElevator']); // заполняет tidivision_id и tiobjectcode по id лифта ElevatorID из tiElevator
                 //$Ticket->tiobjectcode = инв. номер по $data['tiElevator'];
                 //$Ticket->tidivision_id = $data[''];
