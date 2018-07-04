@@ -77,6 +77,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 </div>
 
+	<a id="meterdata"></a>
 <div>
 	<H2> <?php echo Yii::t('meter','Meter readings'); ?> </H2>
 	<?php  
@@ -101,14 +102,11 @@ $this->params['breadcrumbs'][] = $this->title;
         [
         	'label' => Yii::t('meter','Photo'),
         	'content' => function($data){
-				if (true) {
-					if (1 == $data['id'])
-						$res = "<a class='meterdataphoto' href=".Url::base()."/ReadingsPhoto/M".$data['mdatameter_id']."/R".$data['id']."/1.8.0.jpg".'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
-					else
-						$res = "<a class='meterdataphoto' href=".Url::toRoute(['meter/get-meter-photo','MeterId' => $data['mdatameter_id'], 'RecId'=>$data['id'], 'type'=>'.jpeg']).'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
-				}
+				if (!empty( $data['mdatafile']))
+					//$res = "<a class='meterdataphoto' href=".Url::base()."/ReadingsPhoto/M".$data['mdatameter_id']."/R".$data['id']."/1.8.0.jpg".'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
+					$res = "<a class='meterdataphoto' href=".Url::toRoute(['meter/get-meter-photo','MeterId' => $data['mdatameter_id'], 'RecId'=>$data['id'], 'type'=>'.jpeg']).'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
 				else
-					$res = 	'';
+					$res = "";
 				return $res;
          	}
 		],

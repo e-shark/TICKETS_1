@@ -8,6 +8,8 @@ use yii\data\SqlDataProvider;
 
 class Meter extends Model
 {
+    const READINGSPATH  = 'data'.DIRECTORY_SEPARATOR.'ReadingsPhoto';		// Директория (относительно приложения), куда  будут складываться фотографии показаний счетчика
+
     public $imageFile;
     public $MeterId;
 
@@ -33,7 +35,7 @@ class Meter extends Model
 	// Получить массив показаний по счетчику
 	public function GetReadings($id)
 	{
-		$sqltext = "SELECT * FROM powermeterdata where mdatameter_id=".$id." order by mdatatime desc ";
+		$sqltext = "SELECT * FROM powermeterdata where mdatameter_id=".$id." and (mdatadeleted is null) order by mdatatime desc ";
 		$result = new SqlDataProvider([
 			'sql' => $sqltext,
 		]);
@@ -41,7 +43,7 @@ class Meter extends Model
 	}
 
 	// Добавляет одну запись в таблицу показаний счетчиков
-	public function InsertReading($time, $val, $obis, $state, $comment)
+	public function InsertReading($time, $val, $obis, $state, $comment, $filename)
 	{
 		$result = 0;
 		$id = $this->MeterId;
@@ -53,8 +55,9 @@ class Meter extends Model
 			'mdatameterstate' => $state,
 			'mdatacomment' => $comment,
 			'mdatameter_id' => $id,
+			'mdatafile' => $filename,
 		])->execute();    
-		
+
 		$result = intval(Yii::$app->db->getLastInsertID());
 
 		return $result;
@@ -63,18 +66,42 @@ class Meter extends Model
 	// Добавляет данные показаний счетчика
 	// В качестве входного парамета чсло - показание А+ (тогда будет вставлено одно значение с обис кодом "1.8.0")
 	// либо массив пар обискод=>значение (тогда будут вставлены все значения с соответствующими обис кодами)
-	public function AddReadingSimple($reading)
+	public function AddReadingSimple($reading, $picture=NULL)
 	{
 		$res = 0;
 		$time = date("Y-m-d H:i:s");
 		if ( is_array($reading) ){
 			foreach($reading as $obis=>$val){
-				$res = Meter::InsertReading($val, $reading, $obis, '1', NULL);
+				$res = Meter::InsertReading($val, $reading, $obis, '1', NULL, NULL);
 			}
 		}else{
-			$res = Meter::InsertReading($time, $reading, '1.8.0', '1', NULL);
+			$res = Meter::InsertReading($time, $reading, '1.8.0', '1', NULL, $picture);
 		}
 		return $res;
 	}
+
+    public function UploadMeterPhoto($meterid,$recordid,$obis)
+    {
+        $uploadpath = Yii::getAlias('@app').DIRECTORY_SEPARATOR.Meter::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$meterid.DIRECTORY_SEPARATOR.'R'.$recordid;
+        //if ($this->validate()) {
+        if (true){	
+            if (!is_dir($uploadpath)) 
+                if (!mkdir($uploadpath,0777,TRUE))
+                    return false;
+            $this->imageFile->saveAs( $uploadpath.DIRECTORY_SEPARATOR.$obis. '.' . $this->imageFile->extension);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function GetPhotoFileName($recordid){
+    	$res = '';
+    	if (!empty($recordid)){
+	        $uploadpath = Yii::getAlias('@app').DIRECTORY_SEPARATOR.Meter::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$this->MeterId.DIRECTORY_SEPARATOR.'R'.$recordid;
+            $res = $uploadpath.DIRECTORY_SEPARATOR.'1.8.0.jpg';
+    	}
+    	return $res;
+    }
 
 }

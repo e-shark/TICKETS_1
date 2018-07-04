@@ -44,47 +44,31 @@ class MeterController extends Controller
             if ( (!empty($MeterId)) && (!empty($MeterData)) ) {
                 $meter = new Meter($MeterId);
                 $img = new UploadImage();
-                $RecordId = $meter->AddReadingSimple($MeterData);
+                $meter->imageFile = UploadedFile::getInstanceByName('imageFile');
+                $picture = $meter->imageFile;
+                $RecordId = $meter->AddReadingSimple($MeterData,$picture);
                 if ($RecordId > 0) {
                     //$img->imageFile = UploadedFile::getInstance($img, 'imageFile');
-                    $img->imageFile = UploadedFile::getInstanceByName('imageFile');
-                Yii::warning("---XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX----".$img->imageFile."*****************");
-                    if ($img->uploadMeterPhoto($MeterId,$RecordId,'1.8.0')) {
-                        // file is uploaded successfully
-                        return $this->redirect(['meter-info','MeterId'=>$MeterId]);;
+                    if (!empty($picture)){
+                        if ($meter->UploadMeterPhoto($MeterId,$RecordId,'1.8.0')) {
+                            // file is uploaded successfully
+                        }
                     }
                 }
             }
         }   
-        return $this->redirect(['meter-info','MeterId'=>$MeterId]);//$this->redirect(['view','id'=>$id]);
+        return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);//$this->redirect(['view','id'=>$id]);
     }
 
     public function actionGetMeterPhoto($MeterId=0,$RecId=0)  
     {
-        $uploadpath = Yii::getAlias('@app').DIRECTORY_SEPARATOR.'web'.DIRECTORY_SEPARATOR.'ReadingsPhoto'.DIRECTORY_SEPARATOR.'M'.$MeterId.DIRECTORY_SEPARATOR.'R'.$RecId;
-        $filename = $uploadpath.DIRECTORY_SEPARATOR.'1.8.0.jpg';
-        if (file_exists($filename)) {
-
-            //header('X-Accel-Redirect: ' . $filename);
-            //header('Content-Type: application/octet-stream');
-            //header('Content-Disposition: attachment; filename=' . basename($filename));
-            //Yii::$app->response->headers->set('Content-Type', mime_content_type($filename));
-            Yii::$app->response->sendFile($filename);
-            //Yii::warning("-------------------------------------------------------------  ".$filename);
-
-            /*
-            $response = \Yii::$app->getResponse();
-            $m = mime_content_type($filename);
-            $response->headers->set('Content-Type', mime_content_type($filename));
-            $response->format = Response::FORMAT_RAW;
-            if ( !is_resource($response->stream = fopen($filename, 'r')) ) {
-                //throw new NotFoundHttpException('Ничего не найдено');
-                Yii::warning("---XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX----  ".$filename);
-            }            
-            return $response->send();
-            */
-
-          }        
+        if ( (!empty($MeterId)) && (!empty($RecId)) ) {
+            $meter = new Meter($MeterId);
+            $filename = $meter->GetPhotoFileName($RecId);
+            if (file_exists($filename)) {
+                Yii::$app->response->sendFile($filename);
+            }   
+          };    
     }
 
 
