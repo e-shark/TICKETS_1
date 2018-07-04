@@ -13,6 +13,7 @@ class UploadImage extends Model
      */
     const UPLOADPATH  = 'uploads';
     const WEBPATH  = 'web';
+    const READINGSPATH  = 'ReadingsPhoto';
     public $imageFile;
 
     public function rules()
@@ -40,6 +41,7 @@ class UploadImage extends Model
             return false;
         }
     }
+
     /**
      * Returns 1-dimensional array of filenames matched given pattern in upload the site directory
      * @param $filepattern, string or array of strings with patterns for filtering
@@ -58,4 +60,19 @@ class UploadImage extends Model
         //Yii::warning($files,__METHOD__);
         return $files;
     }
+
+    public function uploadMeterPhoto($meterid,$recordid,$obis)
+    {
+        $uploadpath = Yii::getAlias('@app').DIRECTORY_SEPARATOR.self::WEBPATH.DIRECTORY_SEPARATOR.self::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$meterid.DIRECTORY_SEPARATOR.'R'.$recordid;
+        if ($this->validate()) {
+            if (!is_dir($uploadpath)) 
+                if (!mkdir($uploadpath,0777,TRUE))
+                    return false;
+            $this->imageFile->saveAs( $uploadpath.DIRECTORY_SEPARATOR.$obis. '.' . $this->imageFile->extension);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

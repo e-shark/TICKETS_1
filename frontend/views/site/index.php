@@ -27,7 +27,8 @@ $this->title = 'ОЗК ОДС КСП "Харьковгорлифт"';
         <p><a class="btn btn-lg btn-success" href="index.php?r=ticket-input/inputform"><?=YII::t('app','Ticket input')?></a></p>
             <?php } if( FALSE === strpos($uoprights['oprights'],'F' ) ) {?>
         <p><a class="btn btn-lg btn-success" href="index.php?r=reports/index"><?=YII::t('app','Reports')?></a></p>
-        <a class="btn btn-lg btn-success" href="index.php?r=maps/index"><?=YII::t('app','Map')?></a>
+        <p><a class="btn btn-lg btn-success" href="index.php?r=maps/index"><?=YII::t('app','Map')?></a></p>
+        <p><a class="btn btn-lg btn-success" href="index.php?r=meter/index"><?=YII::t('meter','Meters')?></a></p>
             <?php }?>
             
 

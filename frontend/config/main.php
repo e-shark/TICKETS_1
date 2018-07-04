@@ -45,17 +45,23 @@ return [
         ],
         */
 
-	'i18n' => [
-	    'translations' => [
-		'ticketinputform' => [
-            		'class' => 'yii\i18n\PhpMessageSource',
-			'sourceLanguage' => 'en',
-			'fileMap' => [
-	                  'ticketinputform' => 'TicketInputForm.php',
-
-		        ],
-		],
-	    ],
+    	'i18n' => [
+    	    'translations' => [
+        		'ticketinputform' => [
+                		'class' => 'yii\i18n\PhpMessageSource',
+    			         'sourceLanguage' => 'en',
+    			         'fileMap' => [
+    	                       'ticketinputform' => 'TicketInputForm.php',
+    		              ],
+        		],
+                'meter' => [
+                        'class' => 'yii\i18n\PhpMessageSource',
+                         'sourceLanguage' => 'en',
+                         'fileMap' => [
+                              'meter' => 'meter.php',
+                          ],
+                ],
+    	    ],
         ],
 
 

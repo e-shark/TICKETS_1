@@ -103,7 +103,7 @@ class TicketAddData extends Model
 			'tidivision_id'     => $this->tidivision_id,
 			'tiexecutant_id'    => $this->tiexecutant_id,
 			])->execute();    
-            $this->recid = Yii::$app->db->getLastInsertID();;
+            $this->recid = Yii::$app->db->getLastInsertID();
 
 		$res = $this->recid;
 		return $res;
