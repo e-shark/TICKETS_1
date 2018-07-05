@@ -7,7 +7,7 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
 
-$this->title = Yii::t('meter','Meter passport')." ".$passport['meteraccno'];
+$this->title = Yii::t('meter','Meter passport')." ".$passport['meterserialno'];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -82,10 +82,13 @@ $this->params['breadcrumbs'][] = $this->title;
 	<H2> <?php echo Yii::t('meter','Meter readings'); ?> </H2>
 	<?php  
     $dataColumns = [
-        ['class' => 'yii\grid\SerialColumn'],
+        //['class' => 'yii\grid\SerialColumn'],
         [
             'label' =>Yii::t('meter','Date'),
-            'attribute' => 'mdatatime',
+            //'attribute' => 'mdatatime',
+            'content' => function($data){
+            	return "<p data-toggle='tooltip' data-placement='top' title='{$data['employee']}'>{$data['mdatatime']}</p>";
+            }
         ],
         [
             'label' =>Yii::t('meter','Readings'),
@@ -111,6 +114,40 @@ $this->params['breadcrumbs'][] = $this->title;
          	}
 		],
     ];
+    // Разрешенным пользователям добавляем возможность удалять записи
+    // ! ! !   Тут надо добавить проверку пользователя   ! ! !
+
+	array_push( $dataColumns, 
+		[
+			//'class' => 'yii\grid\ActionColumn', 
+			//'template' => '{deletereading}',
+            'content' => function($model) {
+                    return Html::a(
+                        //'<span class="glyphicon glyphicon-trash" style="color: red;">',
+                        '<span class="glyphicon glyphicon-remove" style="color: red;">',
+                        Url::to(['delete-reading', 'MeterId'=>$model['mdatameter_id'],'ReadingId' => $model['id']]),
+                        ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')]
+                    );
+                }		
+        ]
+	);
+    /* 	или так, через ActionColumn
+	array_push( $dataColumns, 
+		[
+			'class' => 'yii\grid\ActionColumn', 
+			'template' => '{deletereading}',
+            'buttons' => [
+                'deletereading' => function($url, $model, $key) {
+                    return Html::a(
+                        //'<span class="glyphicon glyphicon-trash">',
+                        '<span class="glyphicon glyphicon-remove" style="color: red;">',
+                        Url::to(['delete-reading', 'MeterId'=>$model['mdatameter_id'],'ReadingId' => $model['id']]),
+                        ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')]
+                    );
+                }		
+            ],
+        ]
+	);*/
 
 	echo GridView::widget([
 		'dataProvider' => $meterdata,

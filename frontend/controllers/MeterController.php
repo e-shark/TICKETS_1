@@ -32,10 +32,10 @@ class MeterController extends Controller
     	//$Meter->Readings = Meter::GetMeterPassport($MeterId);
         $meterdata = $meter ->GetReadings($MeterId);
         return $this->render( 'MeterInfo', [ 'model' => $meter, 'passport'=>$passport, 'meterdata'=>$meterdata,'imagemodel'=>$imagemodel] );
-
     }
 
-    public function actionAddReading($MeterId )  
+    // Добавляет запись показаний для счетчика
+    public function actionAddReading( $MeterId )  
     {
         if (Yii::$app->request->isPost) {
             $data = Yii::$app->request->post();
@@ -45,7 +45,8 @@ class MeterController extends Controller
                 $meter = new Meter($MeterId);
                 $img = new UploadImage();
                 $meter->imageFile = UploadedFile::getInstanceByName('imageFile');
-                $picture = $meter->imageFile;
+                if ($meter->validate())                                 // Проверяем на правильность имя файла катринки
+                    $picture = $meter->imageFile->name;
                 $RecordId = $meter->AddReadingSimple($MeterData,$picture);
                 if ($RecordId > 0) {
                     //$img->imageFile = UploadedFile::getInstance($img, 'imageFile');
@@ -60,6 +61,17 @@ class MeterController extends Controller
         return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);//$this->redirect(['view','id'=>$id]);
     }
 
+    // Удаляет запись показаний
+    public function actionDeleteReading( $MeterId, $ReadingId=0 )  
+    {
+        if ( (!empty($MeterId)) && (!empty($ReadingId)) ) {
+            $meter = new Meter($MeterId);
+            $meter->DeleteReading($ReadingId);
+        }
+
+        return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);
+    }
+
     public function actionGetMeterPhoto($MeterId=0,$RecId=0)  
     {
         if ( (!empty($MeterId)) && (!empty($RecId)) ) {
@@ -68,9 +80,12 @@ class MeterController extends Controller
             if (file_exists($filename)) {
                 Yii::$app->response->sendFile($filename);
             }   
-          };    
+        };    
     }
 
+    public function actionEnterReading( $MeterId )  
+    {
+    }
 
 }
 
