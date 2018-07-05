@@ -5,10 +5,8 @@ use yii;
 use yii\web\Controller;
 use frontend\models\Meter;
 use frontend\models\MeterList;
-use frontend\models\UploadImage;
-use yii\web\UploadedFile;
 use yii\web\Response;
-
+use yii\web\UploadedFile;
 
 class MeterController extends Controller
 {
@@ -26,36 +24,24 @@ class MeterController extends Controller
 	public function actionMeterInfo($MeterId = 0 )	
     {
     	$meter = new Meter($MeterId);
-        $imagemodel = new UploadImage();
         $passport = $meter->GetMeterPassport($MeterId);
-        //if (empty($passport )) $this->redirect(['index']);
-    	//$Meter->Readings = Meter::GetMeterPassport($MeterId);
         $meterdata = $meter ->GetReadings($MeterId);
-        return $this->render( 'MeterInfo', [ 'model' => $meter, 'passport'=>$passport, 'meterdata'=>$meterdata,'imagemodel'=>$imagemodel] );
+
+        return $this->render( 'MeterInfo', [ 'model' => $meter, 'passport'=>$passport, 'meterdata'=>$meterdata] );
+
     }
 
     // Добавляет запись показаний для счетчика
-    public function actionAddReading( $MeterId )  
+    public function actionAddReading( )  
     {
         if (Yii::$app->request->isPost) {
             $data = Yii::$app->request->post();
             $MeterId = $data['MeterId'];
-            $MeterData =  $data['MeterData'];
+            $MeterData = $data['MeterData'];
+            $MeterPhoto = UploadedFile::getInstanceByName('imageFile');
             if ( (!empty($MeterId)) && (!empty($MeterData)) ) {
                 $meter = new Meter($MeterId);
-                $img = new UploadImage();
-                $meter->imageFile = UploadedFile::getInstanceByName('imageFile');
-                if ($meter->validate())                                 // Проверяем на правильность имя файла катринки
-                    $picture = $meter->imageFile->name;
-                $RecordId = $meter->AddReadingSimple($MeterData,$picture);
-                if ($RecordId > 0) {
-                    //$img->imageFile = UploadedFile::getInstance($img, 'imageFile');
-                    if (!empty($picture)){
-                        if ($meter->UploadMeterPhoto($MeterId,$RecordId,'1.8.0')) {
-                            // file is uploaded successfully
-                        }
-                    }
-                }
+                $meter->SaveReading($MeterData, $MeterPhoto);
             }
         }   
         return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);//$this->redirect(['view','id'=>$id]);
@@ -72,11 +58,12 @@ class MeterController extends Controller
         return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);
     }
 
+    // Получить фотографию показаний
     public function actionGetMeterPhoto($MeterId=0,$RecId=0)  
     {
         if ( (!empty($MeterId)) && (!empty($RecId)) ) {
             $meter = new Meter($MeterId);
-            $filename = $meter->GetPhotoFileName($RecId);
+            $filename = $meter->GetReadingPhotoFileName($RecId);
             if (file_exists($filename)) {
                 Yii::$app->response->sendFile($filename);
             }   

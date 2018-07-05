@@ -173,13 +173,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']],'post') ?>
-		<?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
 
     <!--div class="row panel panel-info"-->
         <div class="col-md-4">
     	<div class="input-group">
     		<span class="input-group-addon">Показания</span>
-				<?php echo Html::input('text','MeterData','',['id'=>'MeterData','class'=>'form-control']); ?> 
+			<?php echo Html::input('text','MeterData','',['id'=>'MeterData','class'=>'form-control']); ?> 
     	</div>
     	</div>
         <div class="col-md-4">
@@ -187,8 +186,9 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?php echo Html::input('file','imageFile','',['id'=>'imageFile','class'=>'form-control', 'accept'=>"image/*,image/jpeg"]); ?> 
 			<?php //echo $form->field($imagemodel, 'imageFile')->fileInput() ?>
     	</div>
+		<?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
         <div class="col-md-1">
-			<?= '<br>'.Html::submitButton(Yii::t('app','Add'), ['class'=>'submit btn btn-primary','formaction'=>Url::toRoute(['add-reading','MeterId'=>$model->MeterId])]) ?>
+			<?= '<br>'.Html::submitButton(Yii::t('app','Add'), ['class'=>'submit btn btn-primary','formaction'=>Url::toRoute(['add-reading'])]) ?>
        	</div>
 
 <?php ActiveForm::end() ?>

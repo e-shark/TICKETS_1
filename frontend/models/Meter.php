@@ -5,6 +5,7 @@ namespace frontend\models;
 use yii;
 use yii\base\Model;
 use yii\data\SqlDataProvider;
+use yii\web\UploadedFile;
 
 class Meter extends Model
 {
@@ -21,7 +22,7 @@ class Meter extends Model
     public function rules()
     {
         return [
-            [['imageFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg'],
+            [['imageFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg'],		// Для валидации загружаемой фотографии
         ];
     }
 
@@ -71,27 +72,6 @@ class Meter extends Model
 		return $result;
 	}
 
-	// Добавляет данные показаний счетчика
-	// В качестве входного парамета чсло - показание А+ (тогда будет вставлено одно значение с обис кодом "1.8.0")
-	// либо массив пар обискод=>значение (тогда будут вставлены все значения с соответствующими обис кодами)
-	public function AddReadingSimple($reading, $picture=NULL)
-	{
-		$res = 0;
-		$oprights = Tickets::getUserOpRights();
-		if( !empty($oprights) ) {
-			$now = date("Y-m-d H:i:s");
-			$who = $oprights['id'];
-			if ( is_array($reading) ){
-				foreach($reading as $obis=>$val){
-					$res = Meter::InsertReading($who, $now, $obis, $val, '1', NULL, NULL);
-				}
-			}else{
-				$res = Meter::InsertReading($who, $now, '1.8.0', $reading, '1', NULL, $picture);
-			}
-		}
-		return $res;
-	}
-
 	// Удаление записи с показаниями по счетчику
 	public function DeleteReading($recordid)
 	{
@@ -104,30 +84,66 @@ class Meter extends Model
 		}
 	}
 
-	// Загрузить в базу фотографию показаний
-    public function UploadMeterPhoto($meterid,$recordid,$obis)
+	// Добавить фотографию к показаниям
+	// Сохраняет файл с фотографией, и в базу записывает расширение файла (только расширение, патамушто имя вычисляется по формуле)
+    public function AddReadingPhoto($recordid, $filenamebody)
     {
-        $uploadpath = Yii::getAlias('@app').DIRECTORY_SEPARATOR.Meter::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$meterid.DIRECTORY_SEPARATOR.'R'.$recordid;
-        $vres = $this->validate();
-        Yii::warning("==============================[".$vres."]=====");
-        if ($vres) {
-        //if (true){	
-            if (!is_dir($uploadpath)) 
-                if (!mkdir($uploadpath,0777,TRUE))
+    	$path = $this->MakePhotoFilePath();
+        if ($this->validate()) {
+        	$ext = $this->imageFile->extension;
+            if (!is_dir($path)) 
+                if (!mkdir($path,0777,TRUE))
                     return false;
-            $this->imageFile->saveAs( $uploadpath.DIRECTORY_SEPARATOR.$obis. '.' . $this->imageFile->extension);
-            return true;
-        } else {
-            return false;
+            $sres = $this->imageFile->saveAs( $path.$filenamebody.'.'.$ext);
+            if ($sres)		// если удалось записать файл
+				Yii::$app->db->createCommand("UPDATE powermeterdata SET mdatafile = '{$ext}' WHERE id=".$recordid)->execute();
         }
     }
 
+    // Сохраняем показания с картинкой (если она есть)
+    // MeterData - цифра показаний
+    // MeterPhoto - файл картинки (объект null|yii\web\UploadedFile, загруженый с помощью getInstanceByName() )
+    public function SaveReading($MeterData, $MeterPhoto)
+    {
+		$oprights = Tickets::getUserOpRights();
+		if( !empty($oprights) ) {
+			$now = date("Y-m-d H:i:s");
+			$who = $oprights['id'];
+            $this->imageFile = $MeterPhoto;
+            $obis = '1.8.0';
+           	$rid = $this->InsertReading($who, $now, $obis, $MeterData, '1', NULL, NULL);
+           	if (!empty($rid)){
+           		if ($this->validate())				// проверяем картинку (точнее исходное название файла с картинкой)
+           			$this->AddReadingPhoto( $rid, $this->MakePhotoFileNameBody($rid, $obis, $now) );
+           	}
+           	// ЦОЙ ЖИВ !!!
+        }
+    }
+
+    // Получить тело имени файла (без пути и расширения)
+    public function MakePhotoFileNameBody($recordid, $obis, $datetime )
+    {
+    	$timestamp = preg_replace('~\D+~','',$datetime);  	// убираем из строки все, окромя цифр
+    	$res .= 'R'.$recordid.'_'.$obis.'_'.$timestamp;		// скрещиваем номер записи, обис код и дату записи
+    	return $res;
+    }
+
+    // Получить путь, где складываем фото показаний
+	public function MakePhotoFilePath()
+	{
+    	$res = Yii::getAlias('@app').DIRECTORY_SEPARATOR.Meter::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$this->MeterId.DIRECTORY_SEPARATOR;
+    	return $res;
+	}
+
     // Получить имя файла, где лежит на сервере фотография показаний
-    public function GetPhotoFileName($recordid){
+    public function GetReadingPhotoFileName($recordid){
     	$res = '';
     	if (!empty($recordid)){
-	        $uploadpath = Yii::getAlias('@app').DIRECTORY_SEPARATOR.Meter::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$this->MeterId.DIRECTORY_SEPARATOR.'R'.$recordid;
-            $res = $uploadpath.DIRECTORY_SEPARATOR.'1.8.0.jpg';
+	    	$sqltext = "SELECT mdatatime, mdatacode, mdatafile FROM powermeterdata WHERE id =".$recordid.";";
+   			$rec = Yii::$app->db->createCommand($sqltext)->queryOne();	
+			if (!empty($rec)){
+				$res = $this->MakePhotoFilePath().$this->MakePhotoFileNameBody($recordid, $rec['mdatacode'], $rec['mdatatime']).'.'.$rec['mdatafile'];
+			}
     	}
     	return $res;
     }
