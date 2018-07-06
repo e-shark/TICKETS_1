@@ -4,7 +4,7 @@ namespace frontend\controllers;
 use yii;
 use yii\web\Controller;
 use frontend\models\Meter;
-use frontend\models\MeterList;
+use frontend\models\MetersList;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -13,7 +13,8 @@ class MeterController extends Controller
 
 	public function actionIndex()	
     {
-        $meterlist = new MeterList();
+        $meterlist = new MetersList();
+        //$filter = MetersList::FillFilterParams($meterlist, Yii::$app->request->queryParams);
     	// Тут когда-нибудь будет список всех счетчиков с фильтром поиска
     	// return "This page is under construction";
         $provider = $meterlist->GetMeterList();
@@ -52,7 +53,7 @@ class MeterController extends Controller
     }
 
     // Удаляет запись показаний
-    public function actionDeleteReading( $MeterId, $ReadingId=0 )  
+    public function actionDeleteReading( $MeterId=0, $ReadingId=0 )  
     {
         if ( (!empty($MeterId)) && (!empty($ReadingId)) ) {
             $meter = new Meter($MeterId);
@@ -63,11 +64,11 @@ class MeterController extends Controller
     }
 
     // Получить фотографию показаний
-    public function actionGetMeterPhoto($MeterId=0,$RecId=0)  
+    public function actionGetMeterPhoto( $MeterId=0, $ReadingId=0 )  
     {
-        if ( (!empty($MeterId)) && (!empty($RecId)) ) {
+        if ( (!empty($MeterId)) && (!empty($ReadingId)) ) {
             $meter = new Meter($MeterId);
-            $filename = $meter->GetReadingPhotoFileName($RecId);
+            $filename = $meter->GetReadingPhotoFileName($ReadingId);
             if (file_exists($filename)) {
                 Yii::$app->response->sendFile($filename);
             }   
@@ -75,7 +76,7 @@ class MeterController extends Controller
     }
 
     // Ввод показаний по счетчику
-    public function actionEnterReading( $MeterId )  
+    public function actionEnterReading( $MeterId=0 )  
     {
         if (!empty($MeterId)) {
             $meter = new Meter($MeterId);

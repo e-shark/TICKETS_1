@@ -10,6 +10,7 @@ $this->title = Yii::t('meter','Meter passport')." ".$passport['meterserialno'];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
+<?php if (!empty($passport)) {                  // Проверяем, а существует ли указанный счетчик ?>
 <h1><?= Html::encode($this->title) ?></h1>
 <div>
 	<?php $FieldType=" alert alert-info" ?>
@@ -106,7 +107,7 @@ $this->params['breadcrumbs'][] = $this->title;
         	'content' => function($data){
 				if (!empty( $data['mdatafile']))
 					//$res = "<a class='meterdataphoto' href=".Url::base()."/ReadingsPhoto/M".$data['mdatameter_id']."/R".$data['id']."/1.8.0.jpg".'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
-					$res = "<a class='meterdataphoto' href=".Url::toRoute(['meter/get-meter-photo','MeterId' => $data['mdatameter_id'], 'RecId'=>$data['id'], 'type'=>'.jpeg']).'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
+					$res = "<a class='meterdataphoto' href=".Url::toRoute(['meter/get-meter-photo','MeterId' => $data['mdatameter_id'], 'ReadingId'=>$data['id'], 'type'=>'.jpeg']).'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
 				else
 					$res = "";
 				return $res;
@@ -166,6 +167,7 @@ $this->params['breadcrumbs'][] = $this->title;
     'coreStyle' => 4
 ]) ?>
 
+
 <div class="panel panel-default">
   <div class="panel-heading"><?php echo Html::label(Yii::t('meter','Input of readings')); ?></div>
   <div class="panel-body">
@@ -194,3 +196,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
   </div>
 </div>
+
+<?php }else{ // Если указан несуществующий ID счетчика ?>
+<div>
+    <h1><?= Yii::t('meter','Information on the meter not found') ?></h1>
+    <a href="<?= Yii::$app->request->referrer ?>" class="btn btn-primary"><?=Yii::t('meter','Back')?></a>
+</div>
+<?php } ?>

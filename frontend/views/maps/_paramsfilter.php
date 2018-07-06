@@ -79,11 +79,11 @@ $addr1 = Url::toRoute(["get-marker-list"]);
 <script type="text/javascript">
     function sendAjaxForm() {
     $.ajax({
-      url:      '<?php echo $addr1?>' ,     //url страницы 
-      type:     "POST",                     //метод отправки
-      dataType: "html",                     //формат данных
+      url:      '<?php echo $addr1?>' ,     // url страницы 
+      type:     "POST",                     // метод отправки
+      dataType: "html",                     // формат данных
       data: $("#ajax_form").serialize(),    // Сеарилизуем объект
-      success: function(response) {         //Данные отправлены успешно
+      success: function(response) {         // Данные отправлены успешно
         result = $.parseJSON(response);
         <?php echo $fcallback?>(result)
       },

@@ -26,4 +26,6 @@ return[
 'Address' => 'Адрес',
 'Input of readings' => 'Ввод показаний',
 'for meter' => 'для счетчика',
+'Information on the meter not found' => 'Информация по счетчику не найдена',
+'Back' => 'Вернуться',
 ];

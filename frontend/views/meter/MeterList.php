@@ -1,18 +1,19 @@
 <?php
 use yii\helpers\Html;
 use yii\helpers\Url;
-use frontend\models\Tickets;
 use yii\grid\GridView;
-
 
 $this->title = Yii::t('meter','Meter list');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="report-holder">
-	<h1><?= Html::encode($this->title) ?></h1>
-   	<?php  
 
+	<h1><?= Html::encode($this->title) ?></h1>
+    <div>
+        <?php echo $this->render('_metersparamsfilter.php', [ 'model'=>$model]); ?>
+    </div>
+   	<?php   
         $mtrColumns = [
             ['class' => 'yii\grid\SerialColumn'],
             [
