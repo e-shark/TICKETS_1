@@ -39,12 +39,16 @@ class MeterController extends Controller
             $MeterId = $data['MeterId'];
             $MeterData = $data['MeterData'];
             $MeterPhoto = UploadedFile::getInstanceByName('imageFile');
+            $RefUrl = $data['RefUrl'];
             if ( (!empty($MeterId)) && (!empty($MeterData)) ) {
                 $meter = new Meter($MeterId);
                 $meter->SaveReading($MeterData, $MeterPhoto);
             }
         }   
-        return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);//$this->redirect(['view','id'=>$id]);
+        if (empty($RefUrl))
+            return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);//$this->redirect(['view','id'=>$id]);
+        else
+            return $this->redirect($RefUrl);
     }
 
     // Удаляет запись показаний
@@ -70,9 +74,15 @@ class MeterController extends Controller
         };    
     }
 
+    // Ввод показаний по счетчику
     public function actionEnterReading( $MeterId )  
     {
+        if (!empty($MeterId)) {
+            $meter = new Meter($MeterId);
+            $passport = $meter->GetMeterPassport($MeterId);
+            return $this->render( 'MeterEnterData', [ 'model' => $meter, 'passport'=>$passport, 'refurl'=>(Yii::$app->request->referrer ?: Yii::$app->homeUrl) ]);
+        } else 
+            return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
-
 }
 

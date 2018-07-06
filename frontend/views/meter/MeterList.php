@@ -16,27 +16,30 @@ $this->params['breadcrumbs'][] = $this->title;
         $mtrColumns = [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'label' => "Номер",
+                'label' => Yii::t('meter','Serial №'),
                 'content' => function($data){
                 	return "<a href=".Url::toRoute(['meter/meter-info']).'&MeterId='.$data['id'].' target="_blank">'.$data['meterserialno'].'</a>';
                 }
             ],
             [
-                'label' =>"Тип",
+                'label' => Yii::t('meter','Type'),
                 'attribute' => 'metermodel',
             ],
             [
-                'label' =>"Адрес",
+                'label' => Yii::t('meter','Address'),
                 'attribute' => 'addrstr',
             ],
 
             [
-                'label' =>"Дата",
+                'label' => Yii::t('meter','Date'),
                 'attribute' => 'mdatatime',
             ],
             [
-                'label' =>"Показания",
-                'attribute' => 'mdata',
+                'label' => Yii::t('meter','Readings'),
+                //'attribute' => 'mdata',
+                'content' => function($data){
+                    return "<a href=".Url::toRoute(['meter/enter-reading']).'&MeterId='.$data['id'].(empty($data['mdata'])?' class="not-set"':'').' >'.(empty($data['mdata'])?"(не задано)":$data['mdata']).'</a>';
+                }
             ],
         ];
 
@@ -45,6 +48,5 @@ $this->params['breadcrumbs'][] = $this->title;
     		'columns' => $mtrColumns, 
 		]);
 	?>
-    <input id="printButton" type="image" src="/img/print.png" value="Печать" onclick="print_page()"></input>
 </div>	
 

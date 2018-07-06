@@ -20,7 +20,7 @@ left join (
  select powermeter.id ,powermeterdata.mdatatime, powermeterdata.mdatacode, powermeterdata.mdata  
  from powermeter 
  join powermeterdata on powermeterdata.mdatameter_id = powermeter.id 
- join (select max(mdatatime) as maxt from powermeterdata  group by mdatameter_id ) m2 on m2.maxt =mdatatime
+ join (select max(mdatatime) as maxt from powermeterdata where mdatadeltime is null group by mdatameter_id ) m2 on m2.maxt =mdatatime
 ) md on md.id = pm.id
 join facility fa on fa.id = pm.meterfacility_id 
 join street st on st.id=fa.fastreet_id ";

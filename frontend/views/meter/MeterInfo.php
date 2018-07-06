@@ -1,10 +1,9 @@
 <?php
-use yii\helpers\Html;
-use frontend\models\Tickets;
-use yii\grid\GridView;
-use himiklab\colorbox\Colorbox;
 use yii\helpers\Url;
+use yii\helpers\Html;
+use yii\grid\GridView;
 use yii\widgets\ActiveForm;
+use himiklab\colorbox\Colorbox;
 
 
 $this->title = Yii::t('meter','Meter passport')." ".$passport['meterserialno'];

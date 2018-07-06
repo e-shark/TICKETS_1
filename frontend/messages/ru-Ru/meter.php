@@ -25,4 +25,5 @@ return[
 'Account name' => 'Наименование счета',
 'Address' => 'Адрес',
 'Input of readings' => 'Ввод показаний',
+'for meter' => 'для счетчика',
 ];
