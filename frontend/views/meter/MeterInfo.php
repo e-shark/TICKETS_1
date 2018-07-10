@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
     	<div class="col-md-2<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['metecalibrationinterval']) ); ?> </div>
     	<div class="col-md-1"></div>
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Calibr. data')." :"); ?> </div>
-    	<div class="col-md-2<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['metercomno']) ); ?> </div>
+    	<div class="col-md-2<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['metecalibrationdata']) ); ?> </div>  <?php // берем из таблици показаний а не в паспорте ?>
     </div>
     <div class="row">
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Owner')." :"); ?> </div>
@@ -75,6 +75,9 @@ $this->params['breadcrumbs'][] = $this->title;
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Address')." :"); ?> </div>
     	<div class="col-md-7<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['addrstr']) ); ?> </div>
     </div>
+
+    <?php echo Html::a(Yii::t('meter','Edit'), Url::toRoute(['meter/meter-edit','MeterId'=>$passport['id']]), ['class' =>'submit btn btn-success']); ?>
+
 </div>
 
 	<a id="meterdata"></a>

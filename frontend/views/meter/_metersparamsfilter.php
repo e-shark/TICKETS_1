@@ -32,7 +32,7 @@ use frontend\models\MetersList;
         DatePicker::widget(['name'  => 'datefrom',
                                     'value'  => $model->datefrom,
                                     'dateFormat' => 'dd-MM-yyyy',
-                                    'options'=>['class'=>'form-control']]).'</div>';;
+                                    'options'=>['class'=>'form-control']]).'</div>';
       }
       //----Date up to
       if( array_key_exists('dateto',$model->attributes ) ) {
@@ -40,7 +40,7 @@ use frontend\models\MetersList;
         DatePicker::widget(['name'  => 'dateto',
                                     'value'  => $model->dateto,//date('d-M-y'),
                                     'dateFormat' => 'dd-MM-yyyy',
-                                    'options'=>['class'=>'form-control']]).'</div>';;
+                                    'options'=>['class'=>'form-control']]).'</div>';
       }
       //---Additional query string
       if( array_key_exists('address',$model->attributes ) ) {

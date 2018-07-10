@@ -6,6 +6,7 @@ use yii;
 use yii\base\Model;
 use yii\data\SqlDataProvider;
 use yii\web\UploadedFile;
+use yii\helpers\ArrayHelper;
 
 class Meter extends Model
 {
@@ -146,6 +147,16 @@ class Meter extends Model
 			}
     	}
     	return $res;
+    }
+
+    public static function GetMeterTypesOptionsList()
+    {
+    	$res = "";
+	   	$sqltext = "SELECT DISTINCT metermodel, '' as noop  FROM powermeter order by metermodel;";
+	   	$models = ArrayHelper::map(Yii::$app->db->createCommand($sqltext)->queryAll(),'metermodel','noop');
+	   //	if (!empty())
+
+    	return $models;
     }
 
 }

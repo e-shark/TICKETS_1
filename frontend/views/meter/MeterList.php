@@ -49,5 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
     		'columns' => $mtrColumns, 
 		]);
 	?>
+
+    <?php echo Html::a(Yii::t('meter','Add meter'), Url::toRoute(['meter/meter-edit']), ['class' =>'submit btn btn-success']); ?>
 </div>	
 

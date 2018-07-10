@@ -28,4 +28,9 @@ return[
 'for meter' => 'для счетчика',
 'Information on the meter not found' => 'Информация по счетчику не найдена',
 'Back' => 'Вернуться',
+'Add meter' => 'Добавить счетчик',
+'Add new meter' => 'Ввод нового счетчика',
+'Edit meter passport' => 'Редактирование паспорта сетчика',
+'Save' => 'Сохранить',
+'Edit' => 'Редактировать',
 ];

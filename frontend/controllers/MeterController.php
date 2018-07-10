@@ -85,5 +85,29 @@ class MeterController extends Controller
         } else 
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
+
+    // Редактор паспорта счетчика (существующего или нового)
+    public function actionMeterEdit($MeterId=null)  
+    {
+        $meter = new Meter($MeterId);
+        if (!empty($MeterId))
+            $passport = $meter->GetMeterPassport($MeterId);
+        $mtypes = Meter::GetMeterTypesOptionsList();
+        return $this->render( 'MeterEdit', ['model'=>$meter, 'passport'=>$passport, 'mtypes'=>$mtypes] );
+    }
+
+    // Ввод нового счетчика
+    public function actionAddMeter( )  
+    {
+        $meter = new Meter();
+        $MeterId = 1;
+        if (Yii::$app->request->isPost) {
+            $data = Yii::$app->request->post();
+            $MeterId = $data['MeterId'];
+        }
+        return $this->redirect(['meter-info','MeterId'=>$MeterId]);
+    }
+
+
 }
 
