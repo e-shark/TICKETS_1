@@ -11,6 +11,7 @@ use yii\helpers\ArrayHelper;
 class Meter extends Model
 {
     const READINGSPATH  = 'data'.DIRECTORY_SEPARATOR.'ReadingsPhoto';		// Директория (относительно приложения), куда  будут складываться фотографии показаний счетчика
+    const CalibrationOBIS = 'C.2.5';										// ОБИС код параметра "дата кпоследней поверки" (калибровки)
 
     public $imageFile;
     public $MeterId;
@@ -31,12 +32,19 @@ class Meter extends Model
 	public function GetMeterPassport($id)
 	{
 		$sqltext = "SELECT pm.* ,
- 		concat(' ',ifnull(st.streettype,''),' ', ifnull(st.streetname,''),' ', ifnull(fa.faaddressno,''), IF(IFNULL(pm.meterporchno,0), concat(' п.',pm.meterporchno),'') ) as addrstr 
+ 		concat(' ',ifnull(st.streettype,''),' ', ifnull(st.streetname,''),' ', ifnull(fa.faaddressno,''), IF( (pm.meterporchno!=''), concat(' п.',pm.meterporchno),'') ) as addrstr ,
+ 		ds.districtcode, fa.fastreet_id, fa.faaddressno  
 		FROM powermeter pm
 		join facility fa on fa.id = pm.meterfacility_id 
 		join street st on st.id=fa.fastreet_id
+		join district ds on ds.id = fa.fadistrict_id
 		WHERE pm.id=".($id)." ;";
 		$res = Yii::$app->db->createCommand($sqltext)->queryOne();	
+		if (!empty($res)){
+			$sqltext = "SELECT mdatatime FROM powermeterdata WHERE mdatacode='".Meter::CalibrationOBIS."' AND (mdatameter_id={$id}) ORDER BY mdatatime DESC;";
+			$lastcalibrdate = Yii::$app->db->createCommand($sqltext)->queryOne()['mdatatime'];
+			$res['metecalibrationdata'] = $lastcalibrdate;
+		}
 		return $res;
 	}
 
@@ -44,33 +52,46 @@ class Meter extends Model
 	public function GetReadings($id)
 	{
 		//$sqltext = "SELECT * FROM powermeterdata where mdatameter_id=".$id." and (mdatadeltime is null) order by mdatatime desc ";
-		$sqltext = "SELECT concat(e.lastname,' ',e.firstname,' ',e.patronymic) as employee, pm.* FROM powermeterdata pm left join  employee e on pm.mdatawho=e.id where mdatameter_id={$id} and (mdatadeltime is null) order by mdatatime desc ";
-		$result = new SqlDataProvider([
-			'sql' => $sqltext,
-		]);
+		$sqltext = "SELECT concat(e.lastname,' ',e.firstname,' ',e.patronymic) as employee, pm.* FROM powermeterdata pm left join  employee e on pm.mdatawho=e.id where mdatameter_id={$id} and (mdatadeltime is null) and (mdatacode='1.8.0') order by mdatatime desc ";
+		$result = new SqlDataProvider([ 'sql' => $sqltext ]);
 		return $result;
 	}
 
 	// Добавляет одну запись в таблицу показаний счетчиков
-	public function InsertReading($who, $time, $obis, $val, $state, $comment, $filename)
+	public static function InsertReading($meterId, $who, $time, $obis, $val, $state, $comment, $filename)
 	{
 		$result = 0;
-		$id = $this->MeterId;
-
-		Yii::$app->db->createCommand()->insert('powermeterdata',[
-			'mdatawho' => $who,
-			'mdatatime' => $time,
-			'mdata' => $val,
-			'mdatacode' => $obis,
-			'mdatameterstate' => $state,
-			'mdatacomment' => $comment,
-			'mdatameter_id' => $id,
-			'mdatafile' => $filename,
-		])->execute();    
-
-		$result = intval(Yii::$app->db->getLastInsertID());
-
+		if (!empty($meterId)) {
+			Yii::$app->db->createCommand()->insert('powermeterdata',[
+				'mdatawho' => $who,
+				'mdatatime' => $time,
+				'mdata' => $val,
+				'mdatacode' => $obis,
+				'mdatameterstate' => $state,
+				'mdatacomment' => $comment,
+				'mdatameter_id' => $meterId,
+				'mdatafile' => $filename,
+			])->execute();    
+			$result = intval(Yii::$app->db->getLastInsertID());
+		}
 		return $result;
+	}
+
+
+	// Обновить дату последней поверки счетчика
+	public static function UpdateCalibrationDate($MeterId, $Date)
+	{
+		try{$dateiso=Yii::$app->formatter->asDate($Date,'yyyy-MM-dd');}catch(\Exception $e){ $dateiso=null;}
+		if ( (!empty($MeterId)) && (!empty($dateiso)) ) {
+			$sqltext = "SELECT id FROM powermeterdata WHERE mdatacode='".Meter::CalibrationOBIS."' AND (mdatameter_id={$MeterId}) AND mdatatime='{$dateiso}';";
+			$id = Yii::$app->db->createCommand($sqltext)->queryOne()['id'];
+			if (empty($id)){
+				$oprights = Tickets::getUserOpRights();
+				if( !empty($oprights) ) {
+					Meter::InsertReading( $MeterId, $oprights['id'], $dateiso, Meter::CalibrationOBIS, NULL, 1, NULL, NULL );
+				}
+			}
+		}	
 	}
 
 	// Удаление записи с показаниями по счетчику
@@ -108,11 +129,12 @@ class Meter extends Model
     {
 		$oprights = Tickets::getUserOpRights();
 		if( !empty($oprights) ) {
+			$mid = $this->MeterId;
 			$now = date("Y-m-d H:i:s");
 			$who = $oprights['id'];
             $this->imageFile = $MeterPhoto;
             $obis = '1.8.0';
-           	$rid = $this->InsertReading($who, $now, $obis, $MeterData, '1', NULL, NULL);
+           	$rid = $this->InsertReading($mid, $who, $now, $obis, $MeterData, '1', NULL, NULL);
            	if (!empty($rid)){
            		if ($this->validate())				// проверяем картинку (точнее исходное название файла с картинкой)
            			$this->AddReadingPhoto( $rid, $this->MakePhotoFileNameBody($rid, $obis, $now) );
@@ -149,6 +171,7 @@ class Meter extends Model
     	return $res;
     }
 
+    // Выдать список типов имеющихся счетчиков
     public static function GetMeterTypesOptionsList()
     {
     	$res = "";
@@ -159,4 +182,65 @@ class Meter extends Model
     	return $models;
     }
 
+    public function SavePassport($data)
+    {
+    	$MeeterId = 0;
+    	if (!empty($data)){
+    		if (empty($data['MeterId'])){
+    			// Создаем новую запсь
+				Yii::$app->db->createCommand()->insert('powermeter',[
+					'metermodel' => $data['metermodel'],
+					'meterserialno' => $data['meterserialno'],
+					'meterdigits' => $data['meterdigits'],
+					'meterphases' => $data['meterphases'],
+					'metecalibrationinterval' => $data['metecalibrationinterval'],
+					'metercurrent' => $data['metercurrent'],
+					'metermaxcurrent' => $data['metermaxcurrent'],
+					'metervoltage' => $data['metervoltage'],
+					'metercomno' => $data['metercomno'],
+					'metersysno' => $data['metersysno'],
+					'meterimei' => $data['meterimei'],
+					'meterphone' => $data['meterphone'],
+					'meterip' => $data['meterip'],
+					'meterinventoryno' => $data['meterinventoryno'],
+					'meteraccno' => $data['meteraccno'],
+					'meteraccname' => $data['meteraccname'],
+					'meterowner' => $data['meterowner'],
+					'meterdescr' => $data['meterdescr'],
+					'meterloaddescr' => $data['meterloaddescr'],
+					'meterporchno' => $data['meterporchno'],
+					'meterfacility_id' => $data['meterfacility_id'],
+				])->execute();    
+            	$MeeterId = Yii::$app->db->getLastInsertID();
+    		}else{
+    			// Редактируем имеющеюся запись
+	    		$MeeterId = $data['MeterId'];
+				Yii::$app->db->createCommand()->update('powermeter',[
+					'metermodel' => $data['metermodel'],
+					'meterserialno' => $data['meterserialno'],
+					'meterdigits' => $data['meterdigits'],
+					'meterphases' => $data['meterphases'],
+					'metecalibrationinterval' => $data['metecalibrationinterval'],
+					'metercurrent' => $data['metercurrent'],
+					'metermaxcurrent' => $data['metermaxcurrent'],
+					'metervoltage' => $data['metervoltage'],
+					'metercomno' => $data['metercomno'],
+					'metersysno' => $data['metersysno'],
+					'meterimei' => $data['meterimei'],
+					'meterphone' => $data['meterphone'],
+					'meterip' => $data['meterip'],
+					'meterinventoryno' => $data['meterinventoryno'],
+					'meteraccno' => $data['meteraccno'],
+					'meteraccname' => $data['meteraccname'],
+					'meterowner' => $data['meterowner'],
+					'meterdescr' => $data['meterdescr'],
+					'meterloaddescr' => $data['meterloaddescr'],
+					'meterporchno' => $data['meterporchno'],
+					'meterfacility_id' => $data['meterfacility_id'],
+				], ['id'=>$MeeterId] )->execute();
+    		}
+
+    	}
+    	return $MeeterId;
+    }
 }

@@ -1,6 +1,9 @@
 <?php
+use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\jui\DatePicker;
+use yii\helpers\ArrayHelper;
+use conquer\select2\Select2Widget;
 
 $IsNewMeter = empty($model->MeterId);
 if ($IsNewMeter)
@@ -21,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Type')." :"); ?> </div>
     	<div class="col-md-2 ">
-        	<?php	echo Html::input('text','metermodelInput',$passport['metermodel'],['id'=>'metermodel','class'=>'form-control','placeholder'=>Yii::t('meter','Type'),'list'=>'dlTypesList']); ?> 
+        	<?php	echo Html::input('text','metermodel',$passport['metermodel'],['id'=>'metermodel','class'=>'form-control','placeholder'=>Yii::t('meter','Type'),'list'=>'dlTypesList']); ?> 
         	<?php	echo '<datalist id="dlTypesList">';
 					echo Html::renderSelectOptions(null,$mtypes);    
 					echo '</datalist>';
@@ -33,23 +36,6 @@ $this->params['breadcrumbs'][] = $this->title;
 			<?php echo Html::input('text','meterserialno',$passport['meterserialno'],['id'=>'meterserialno','class'=>'form-control','placeholder'=>Yii::t('meter','Serial №')]); ?> 
     	</div>
 	</div>
-
-
-    <div class="row">
-    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Type')." :"); ?> </div>
-    	<div class="col-md-2">
-			<input type="text" class='form-control' list="cars" placeholder='Тип2' id='idtest' name='nametest' />
-			<datalist id="cars">
-			  <option>Тип 1</option>
-			  <option>Тип 2</option>
-			  <option>Еще тип</option>
-			  <option>Another type</option>
-			  <option>Type 5</option>
-			  <option>Type 6</option>
-			</datalist>
-		</div>
-	</div>
-
 
 	<div class="row">
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Phases')." :"); ?> </div>
@@ -79,6 +65,18 @@ $this->params['breadcrumbs'][] = $this->title;
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Current max')." :"); ?> </div>
 		<div class="col-md-2">
 			<?php echo Html::input('text','metermaxcurrent',$passport['metermaxcurrent'],['id'=>'metermaxcurrent','class'=>'form-control','placeholder'=>Yii::t('meter','Current max')]); ?> 
+		</div>
+	</div>
+
+	<div class="row">
+    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Voltage')." :"); ?> </div>
+		<div class="col-md-2">
+			<?php echo Html::input('text','metervoltage',$passport['metervoltage'],['id'=>'metervoltage','class'=>'form-control','placeholder'=>Yii::t('meter','Voltage')]); ?> 
+		</div>
+    	<div class="col-md-1"></div>
+    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','System №')." :"); ?> </div>
+		<div class="col-md-2">
+			<?php echo Html::input('text','metersysno',$passport['metersysno'],['id'=>'metersysno','class'=>'form-control','placeholder'=>Yii::t('meter','System №')]); ?> 
 		</div>
 	</div>
 
@@ -130,36 +128,79 @@ $this->params['breadcrumbs'][] = $this->title;
     	<div class="col-md-1"></div>
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Inventory №')." :"); ?> </div>
 		<div class="col-md-2">
-			<?php echo Html::input('text','meterinventoryno',$passport['meterinventoryno'],['id'=>'meterinventoryno','class'=>'form-control','placeholder'=>Yii::t('meter','Calibr. period')]); ?> 
+			<?php echo Html::input('text','meterinventoryno',$passport['meterinventoryno'],['id'=>'meterinventoryno','class'=>'form-control','placeholder'=>Yii::t('meter','Inventory №')]); ?> 
 		</div>
 	</div>
 
 	<div class="row">
-    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Account')." :"); ?> </div>
+		<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Account')." :"); ?> </div>
 		<div class="col-md-2">
 			<?php echo Html::input('text','meteraccno',$passport['meteraccno'],['id'=>'meteraccno','class'=>'form-control','placeholder'=>Yii::t('meter','Account')]); ?> 
 		</div>
-    	<div class="col-md-1"></div>
-    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Account name')." :"); ?> </div>
+		<div class="col-md-1"></div>
+		<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Account name')." :"); ?> </div>
 		<div class="col-md-5">
 			<?php echo Html::input('text','meteraccname',$passport['meteraccname'],['id'=>'meteraccname','class'=>'form-control','placeholder'=>Yii::t('meter','Account name')]); ?> 
 		</div>
 	</div>
 
 	<div class="row">
-    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','')." :"); ?> </div>
-		<div class="col-md-2"></div>
-    	<div class="col-md-1"></div>
-    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','')." :"); ?> </div>
-		<div class="col-md-2"></div>
+		<div class="col-md-1">
+			<?php echo Html::label(Yii::t('ticketinputform','Region')).":"; ?>
+		</div>
+		<div class="col-md-3">
+			<?php echo Html::dropDownList('districtcode', $passport['districtcode'], ArrayHelper::map($regions,'districtcode','districtname'), ['id'=>'districtcode','class'=>'form-control','onChange'=>'onSelectRegion()']); ?> 
+		</div>
+		<div class="col-md-1"></div>
+		<div class="col-md-2">
+			<?php echo Html::label(Yii::t('ticketinputform','Street')).":"; ?>
+		</div>
+		<div class="col-md-3">
+			<?php 
+				echo   Select2Widget::widget([
+					'id' => 'fastreet_id',
+					'name' => 'fastreet_id',
+					'settings' => [ 'width' => '100%', 'val' => "611" ],                 
+					'events' => [ 'select2:select' =>'onSelectStreet' ],
+					'items' => $streets,
+					'value' => $passport['fastreet_id'],
+				]);            
+			?>
+		</div>
 	</div>
 
 	<div class="row">
-    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','')." :"); ?> </div>
-		<div class="col-md-2"></div>
-    	<div class="col-md-1"></div>
-    	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','')." :"); ?> </div>
-		<div class="col-md-2"></div>
+
+		<div class="col-md-2">
+			<?php echo Html::label(Yii::t('ticketinputform','Building')).":"; ?>
+		</div>
+		<div class="col-md-2">
+			<?php 
+				echo   Select2Widget::widget([
+					'name' => 'meterfacility_id',
+					'id' => 'meterfacility_id',
+					'settings' => [ 'width' => '100%' ],                 
+					'events' => [ 'select2:select' =>'onSelectFacility'],
+					'items' => $fasilities,
+					'value' => $passport['meterfacility_id'],
+				]);
+			?>
+		</div>
+
+		<div class="col-md-1"></div>
+
+		<div id="divEntranceInput" style='display:none2;'>
+			<div class="col-md-2" >
+				<?php echo Html::label(Yii::t('ticketinputform','Entrance')); ?>
+			</div>
+			<div class="col-md-2" >
+				<?php echo Html::input('text','meterporchno',$passport['meterporchno'],['id'=>'meterporchno','class'=>'form-control']); ?> 
+			</div>
+		</div>
+
+	</div>
+
+	<div class="row"> <br>
 	</div>
 
 
@@ -174,4 +215,71 @@ echo Html::endForm();
 ?>
 
 </div>
+
+<SCRIPT>
+function onSelectRegion()
+{
+    $.ajax({
+         url: "<?php echo Url::toRoute(["ticket-input/get-streets-list"]); ?>",
+         type: "POST",
+         dataType: "json",
+         data: {District: $("#districtcode").val()},
+         success: function(datamas) {
+                $("#fastreet_id").html("");
+                $("#fastreet_id").select2({data:datamas, width:'100%'});
+                onSelectStreet();
+         },
+         error:   function() {
+                $("#fastreet_id").html('AJAX error!');
+         }
+
+  });
+  return false;
+}
+
+function onSelectStreet()
+{
+    $.ajax({
+         url: "<?php echo Url::toRoute(["ticket-input/get-facility-list"]); ?>",
+         type: "POST",
+         dataType: "json",
+         data: {StreetId: $("#fastreet_id").val()},
+         success: function(datamas) {
+                $("#meterfacility_id").html("");
+                $("#meterfacility_id").select2({data:datamas, width:'100%'});
+                onSelectFacility();
+         },
+         error:   function() {
+                $("#meterfacility_id").html('AJAX error!');
+         }
+
+  });
+  return false;
+}
+
+function onSelectFacility()
+{
+    $.ajax({
+         url: "<?php echo Url::toRoute(["ticket-input/get-porches-number"]); ?>",
+         type: "POST",
+         dataType: "json",
+         data: {facility_id: $("#meterfacility_id").val()},
+         success: function(data) {
+         	console.log('подъездов: '+data);
+         	if (data>1)
+                $("#divEntranceInput").show();
+            else {
+                $("#divEntranceInput").hide();
+                $("#meterporchno").val("");
+            }
+         },
+         error:   function() {
+                $("#divEntranceInput").html('AJAX error!');
+         }
+
+  });
+  return false;
+}
+
+</SCRIPT>
 

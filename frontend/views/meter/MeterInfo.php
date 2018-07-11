@@ -37,6 +37,13 @@ $this->params['breadcrumbs'][] = $this->title;
     	<div class="col-md-2<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['metermaxcurrent']) ); ?> </div>
     </div>
     <div class="row">
+        <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Voltage')." :"); ?> </div>
+        <div class="col-md-2<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['metervoltage']) ); ?> </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','System №')." :"); ?> </div>
+        <div class="col-md-2<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['metersysno']) ); ?> </div>
+    </div>
+    <div class="row">
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Comm №')." :"); ?> </div>
     	<div class="col-md-2<?php echo $FieldType ?>"> <?php echo Html::label( ($passport['metercomno']) ); ?> </div>
     	<div class="col-md-1"></div>

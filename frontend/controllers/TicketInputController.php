@@ -19,7 +19,8 @@ class TicketInputController extends Controller
 		 parent::__construct($id, $module, $config);	
          $this->tifModel = new TicketInputForm();
 	}
-	 
+
+    // Страница интерфейса ввода заявки	 
 	public function actionInputform()
     {
         $this->tifModel->tiObjects = TicketInputForm::getTiObjects();
@@ -31,6 +32,7 @@ class TicketInputController extends Controller
         return $this->render( 'inputform', [ 'model' => $this->tifModel ] );
     }
 
+    // Получить список улиц района
     public function actionGetStreetsList()
     {
         $res =  json_encode([]);
@@ -44,6 +46,7 @@ class TicketInputController extends Controller
         return $res;
     }
 
+    // Получить список домов на улице
     public function actionGetFacilityList()
     {
         $res =  json_encode([]);
@@ -51,13 +54,27 @@ class TicketInputController extends Controller
             $data = Yii::$app->request->post();
             if (! empty($data)){
                 $StreetId =  0 + $data['StreetId'];
-                $res = json_encode(TicketInputForm::getFacilitysList($StreetId));
+                $res = json_encode(TicketInputForm::getFacilitiesList($StreetId));
             }
         }
         return $res;
     }
 
+    // Получить кол-во подъездов в доме
+    public function actionGetPorchesNumber()
+    {
+        $res = 0;
+        if(Yii::$app->request->isPost) {
+            $data = Yii::$app->request->post();
+            if (! empty($data)){
+                $FacilitytId =  0 + $data['facility_id'];
+                $res = TicketInputForm::getEntranceNumber($FacilitytId);
+            }
+        }
+        return $res;
+    }
 
+    // Получить список возможных неисправностей
     public function actionGetProblemsList()
     {
         $res =  json_encode([]);
@@ -71,11 +88,13 @@ class TicketInputController extends Controller
         return $res;
     }
 
+    // Получить список подъездов, в которых есть лифты
     public function actionGetEntranceWithElevators($FacilityId = 0, $ObjectId = '000')
     {
         return TicketInputForm::getEntranceWithElevators($FacilityId, $ObjectId);
     }
 
+    // Получить список лифтов в доме в конкретном подъезде
     public function actionGetElevatorsList()
     {
         $res =  json_encode([]);
@@ -94,7 +113,7 @@ class TicketInputController extends Controller
         return $res;
     }
 
-
+    // Определить, к какому подразделению передавать заявку по лифту
     public function actionGetElevatorDivision()
     {
         $res = [];
@@ -109,6 +128,7 @@ class TicketInputController extends Controller
         return json_encode($res);
     }
 
+    // Внести новую заявку в базу
     public function actionTicketAdd()
     {
         $Ticket = NULL;
@@ -215,6 +235,7 @@ class TicketInputController extends Controller
         return $this->redirect(['add-confirm', 'tiId'=>(is_null(Ticket)?0:$Ticket->recid)]);
     }
 
+    // Страница подстверждения ввода заявки
     public function actionAddConfirm($tiId)
     {
         $Ticket = new TicketAddData();

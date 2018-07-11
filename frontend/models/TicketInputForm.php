@@ -49,7 +49,7 @@ class TicketInputForm extends Model
 		return $vStreets;
 	}
 
-	public static function getFacilitysList( $StreetID = 0)
+	public static function getFacilitiesList( $StreetID = 0)
 	{
 		$vStreets =  Yii::$app->db->createCommand('SELECT facility.id, coalesce(concat(faaddressno," ","сек.",fasectionno),faaddressno) as text FROM street join facility on   fastreet_id = street.id where street.id ='.$StreetID.';')->queryAll();	
 		return $vStreets;
@@ -63,6 +63,15 @@ class TicketInputForm extends Model
 		return $res;
 	}
 
+	// Получить кол-во подъездов в доме
+	public static function getEntranceNumber($FacilityId = 0)
+	{
+   		$Sel =  Yii::$app->db->createCommand('SELECT faporchesnum FROM facility WHERE id = :fid ;')->bindValues([':fid'=>$FacilityId])->queryOne()['faporchesnum'];		
+   		if (!empty($Sel)) return (0+$Sel);
+   		else return 0;
+	}
+
+	// Получить список подъездов с лифтами
 	public static function getEntranceWithElevators( $FacilityId = 0, $ObjectId = '000')
 	{
    		$Sel =  Yii::$app->db->createCommand('SELECT  elporchno as id, elporchno as text FROM elevator e left join ticketobject o on e.eldevicetype = o.tiobjectdevicetype WHERE elfacility_id = :fid and o.tiobjectcode = :objid group by elporchno;')->bindValues([':fid'=>$FacilityId, ':objid'=>$ObjectId])->queryAll();		

@@ -7,10 +7,13 @@ use frontend\models\Meter;
 use frontend\models\MetersList;
 use yii\web\Response;
 use yii\web\UploadedFile;
+use frontend\models\TicketInputForm;
+use yii\helpers\ArrayHelper;
 
 class MeterController extends Controller
 {
 
+    // Отображение списка счетчика
 	public function actionIndex()	
     {
         $meterlist = new MetersList();
@@ -22,14 +25,14 @@ class MeterController extends Controller
 
     }
 
+    // Отображение паспорта счетчика
 	public function actionMeterInfo($MeterId = 0 )	
     {
     	$meter = new Meter($MeterId);
         $passport = $meter->GetMeterPassport($MeterId);
-        $meterdata = $meter ->GetReadings($MeterId);
+        $meterdata = $meter->GetReadings($MeterId);
 
         return $this->render( 'MeterInfo', [ 'model' => $meter, 'passport'=>$passport, 'meterdata'=>$meterdata] );
-
     }
 
     // Добавляет запись показаний для счетчика
@@ -87,27 +90,37 @@ class MeterController extends Controller
     }
 
     // Редактор паспорта счетчика (существующего или нового)
-    public function actionMeterEdit($MeterId=null)  
+    public function actionMeterEdit($MeterId = null)  
     {
         $meter = new Meter($MeterId);
-        if (!empty($MeterId))
+
+        if (!empty($MeterId)) {
             $passport = $meter->GetMeterPassport($MeterId);
+        }else{
+            $passport['districtcode'] = '6310136600';       // Для нового счетчика район по умолчанию - 'Киевский'
+        }
+
         $mtypes = Meter::GetMeterTypesOptionsList();
-        return $this->render( 'MeterEdit', ['model'=>$meter, 'passport'=>$passport, 'mtypes'=>$mtypes] );
+        $Regions = TicketInputForm::getTiRegions();
+        $Streets = ArrayHelper::map(TicketInputForm::getStreetsList( $passport['districtcode'] ),'id','text');
+        if (empty($MeterId)) $passport['fastreet_id'] = key($Streets);
+        $Fasilities = ArrayHelper::map(TicketInputForm::getFacilitiesList( $passport['fastreet_id'] ),'id','text');
+        return $this->render( 'MeterEdit', ['model'=>$meter, 'passport'=>$passport, 'mtypes'=>$mtypes, 
+                                            'regions'=>$Regions, 'streets'=>$Streets, 'fasilities'=>$Fasilities ] );
     }
 
     // Ввод нового счетчика
     public function actionAddMeter( )  
     {
-        $meter = new Meter();
-        $MeterId = 1;
         if (Yii::$app->request->isPost) {
             $data = Yii::$app->request->post();
-            $MeterId = $data['MeterId'];
+            $MeterId = Meter::SavePassport($data);
+            $meter = new Meter($MeterId);
+            if (!empty($data['metecalibrationdata']))
+                Meter::UpdateCalibrationDate($MeterId, $data['metecalibrationdata']);
         }
         return $this->redirect(['meter-info','MeterId'=>$MeterId]);
     }
-
 
 }
 
