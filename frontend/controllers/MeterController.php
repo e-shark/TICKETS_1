@@ -40,13 +40,14 @@ class MeterController extends Controller
     {
         if (Yii::$app->request->isPost) {
             $data = Yii::$app->request->post();
+            try{$MeterDateTime=Yii::$app->formatter->asDatetime($data['MeterDateTime'],'yyyy-MM-dd');}catch(\Exception $e){ $MeterData=date("Y-m-d");}
             $MeterId = $data['MeterId'];
             $MeterData = $data['MeterData'];
             $MeterPhoto = UploadedFile::getInstanceByName('imageFile');
             $RefUrl = $data['RefUrl'];
             if ( (!empty($MeterId)) && (!empty($MeterData)) ) {
                 $meter = new Meter($MeterId);
-                $meter->SaveReading($MeterData, $MeterPhoto);
+                $meter->SaveReading($MeterDateTime, $MeterData, $MeterPhoto);
             }
         }   
         if (empty($RefUrl))
@@ -78,7 +79,7 @@ class MeterController extends Controller
         };    
     }
 
-    // Ввод показаний по счетчику
+    // Форма ввода показаний по счетчику
     public function actionEnterReading( $MeterId=0 )  
     {
         if (!empty($MeterId)) {

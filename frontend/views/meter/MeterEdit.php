@@ -112,7 +112,7 @@ $this->params['breadcrumbs'][] = $this->title;
     	<div class="col-md-1"></div>
     	<div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Calibr. data')." :"); ?> </div>
 		<div class="col-md-2">
-			<?php echo DatePicker::widget(['name'  => 'metecalibrationdata',		// берем из таблици показаний а не в паспорте
+			<?php echo DatePicker::widget(['name'  => 'metecalibrationdata',		
                                     'value'  => $passport['metecalibrationdata'],
                                     'dateFormat' => 'dd-MM-yyyy',
                                     'options'=>['class'=>'form-control']]);

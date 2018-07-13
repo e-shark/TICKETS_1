@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use himiklab\colorbox\Colorbox;
-
+use yii\jui\DatePicker;
 
 $this->title = Yii::t('meter','Meter passport')." ".$passport['meterserialno'];
 $this->params['breadcrumbs'][] = $this->title;
@@ -87,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </div>
 
-	<a id="meterdata"></a>
+<a id="meterdata"></a>      <?php // Метка, чтобы можно было сюда страницу позиционировать после ввода показаний ?>
 <div>
 	<H2> <?php echo Yii::t('meter','Meter readings'); ?> </H2>
 	<?php  
@@ -184,22 +184,38 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']],'post') ?>
+    <?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
 
-    <!--div class="row panel panel-info"-->
         <div class="col-md-4">
-    	<div class="input-group">
-    		<span class="input-group-addon">Показания</span>
-			<?php echo Html::input('text','MeterData','',['id'=>'MeterData','class'=>'form-control']); ?> 
+            <div class="input-group">
+                <span class="input-group-addon">Дата снятия показаний</span>
+                <?php echo DatePicker::widget(['name'  => 'MeterDateTime',
+                                    'value'  => date("d-m-Y"),
+                                    'dateFormat' => 'dd-MM-yyyy',
+                                    'options'=>['class'=>'form-control']]);
+                ?>                
+            </div>
+        </div>
+
+        <!--div class="row panel panel-info"-->
+        <div class="col-md-3">
+        	<div class="input-group">
+        		<span class="input-group-addon">Показания</span>
+    			<?php echo Html::input('text','MeterData','',['id'=>'MeterData','class'=>'form-control']); ?> 
+        	</div>
     	</div>
-    	</div>
+
         <div class="col-md-4">
-			<?php // echo Html::hiddenInput('imageFile', ""); ?>
-			<?php echo Html::input('file','imageFile','',['id'=>'imageFile','class'=>'form-control', 'accept'=>"image/*,image/jpeg"]); ?> 
-			<?php //echo $form->field($imagemodel, 'imageFile')->fileInput() ?>
+            <div class="input-group">
+                <span class="input-group-addon">Фото</span>
+    			<?php echo Html::input('file','imageFile','',['id'=>'imageFile','class'=>'form-control', 'accept'=>"image/*,image/jpeg"]); ?> 
+            </div>
     	</div>
-		<?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
+
         <div class="col-md-1">
-			<?= '<br>'.Html::submitButton(Yii::t('app','Add'), ['class'=>'submit btn btn-primary','formaction'=>Url::toRoute(['add-reading'])]) ?>
+            <div class="input-group">
+			     <?= Html::submitButton(Yii::t('app','Add'), ['class'=>'submit btn btn-primary','formaction'=>Url::toRoute(['add-reading'])]) ?>
+            </div>
        	</div>
 
 <?php ActiveForm::end() ?>
