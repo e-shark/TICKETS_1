@@ -1,14 +1,14 @@
 <?php
-namespace frontend\controllers;
+namespace frontend\modules\meter\controllers;
 
 use yii;
 use yii\web\Controller;
-use frontend\models\Meter;
-use frontend\models\MetersList;
 use yii\web\Response;
 use yii\web\UploadedFile;
-use frontend\models\TicketInputForm;
 use yii\helpers\ArrayHelper;
+use frontend\models\TicketInputForm;
+use frontend\modules\meter\models\Meter;
+use frontend\modules\meter\models\MetersList;
 
 class MeterController extends Controller
 {

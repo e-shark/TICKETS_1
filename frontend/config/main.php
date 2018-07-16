@@ -54,17 +54,27 @@ return [
     	                       'ticketinputform' => 'TicketInputForm.php',
     		              ],
         		],
+                /*
                 'meter' => [
                         'class' => 'yii\i18n\PhpMessageSource',
                          'sourceLanguage' => 'en',
+                         'basePath' => '@frontend/modules/meter/messages',
                          'fileMap' => [
                               'meter' => 'meter.php',
                           ],
                 ],
+                */
     	    ],
         ],
 
 
     ],
     'params' => $params,
+
+    'modules' => [
+        'meter' => [
+            'class' => 'frontend\modules\meter\MeterModule',
+            // ... другие настройки модуля ...
+        ],
+    ],
 ];

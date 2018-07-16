@@ -1,12 +1,13 @@
 <?php
 
-namespace frontend\models;
+namespace frontend\modules\meter\models;
 
 use yii;
 use yii\base\Model;
 use yii\data\SqlDataProvider;
 use yii\web\UploadedFile;
 use yii\helpers\ArrayHelper;
+use frontend\models\Tickets;
 
 class Meter extends Model
 {

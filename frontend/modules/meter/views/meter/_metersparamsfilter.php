@@ -2,7 +2,7 @@
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\jui\DatePicker;
-use frontend\models\MetersList;
+use frontend\modules\meter\models\MetersList;
 
   //--- Filtering panel1: District,Calltype,Datefrom,Dateto
   echo "<div id='meterparamsfilter'>";

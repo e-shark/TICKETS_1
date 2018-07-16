@@ -220,7 +220,7 @@ echo Html::endForm();
 function onSelectRegion()
 {
     $.ajax({
-         url: "<?php echo Url::toRoute(["ticket-input/get-streets-list"]); ?>",
+         url: "<?php echo Url::toRoute(["/ticket-input/get-streets-list"]); ?>",
          type: "POST",
          dataType: "json",
          data: {District: $("#districtcode").val()},
@@ -240,7 +240,7 @@ function onSelectRegion()
 function onSelectStreet()
 {
     $.ajax({
-         url: "<?php echo Url::toRoute(["ticket-input/get-facility-list"]); ?>",
+         url: "<?php echo Url::toRoute(["/ticket-input/get-facility-list"]); ?>",
          type: "POST",
          dataType: "json",
          data: {StreetId: $("#fastreet_id").val()},
@@ -260,7 +260,7 @@ function onSelectStreet()
 function onSelectFacility()
 {
     $.ajax({
-         url: "<?php echo Url::toRoute(["ticket-input/get-porches-number"]); ?>",
+         url: "<?php echo Url::toRoute(["/ticket-input/get-porches-number"]); ?>",
          type: "POST",
          dataType: "json",
          data: {facility_id: $("#meterfacility_id").val()},

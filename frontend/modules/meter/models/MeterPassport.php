@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models;
+namespace frontend\modules\meter\models;
 
 class MeterPassport extends Model
 {
