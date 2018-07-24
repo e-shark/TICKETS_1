@@ -9,7 +9,7 @@ use frontend\modules\meter\models\MetersList;
       echo '<p>';
 
       //----Filter all button
-      echo Html::beginForm([$this->context->getRoute()],'get',['class'=>'form','id'=>'MeterFiltr']);
+      echo Html::beginForm(['/'.$this->context->getRoute()],'get',['class'=>'form','id'=>'MeterFiltr']);
       echo '<div class="row">';
 
       //---Additional query string

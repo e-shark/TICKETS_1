@@ -18,11 +18,8 @@ class MeterController extends Controller
     {
         $meterlist = new MetersList();
         //$filter = MetersList::FillFilterParams($meterlist, Yii::$app->request->queryParams);
-    	// Тут когда-нибудь будет список всех счетчиков с фильтром поиска
-    	// return "This page is under construction";
         $provider = $meterlist->GetMeterList();
         return $this->render( 'MeterList', ['provider'=>$provider, 'model'=>$meterlist]  );
-
     }
 
     // Отображение паспорта счетчика
@@ -91,6 +88,8 @@ class MeterController extends Controller
     }
 
     // Редактор паспорта счетчика (существующего или нового)
+    // Если задан $MeterId, будет произведено редактирование паспорта.
+    // Если $MeterId не задан, будет добавлен в базу новый счетчик.
     public function actionMeterEdit($MeterId = null)  
     {
         $meter = new Meter($MeterId);
@@ -100,14 +99,13 @@ class MeterController extends Controller
         }else{
             $passport['districtcode'] = '6310136600';       // Для нового счетчика район по умолчанию - 'Киевский'
         }
-
         $mtypes = Meter::GetMeterTypesOptionsList();
         $Regions = TicketInputForm::getTiRegions();
         $Streets = ArrayHelper::map(TicketInputForm::getStreetsList( $passport['districtcode'] ),'id','text');
         if (empty($MeterId)) $passport['fastreet_id'] = key($Streets);
         $Fasilities = ArrayHelper::map(TicketInputForm::getFacilitiesList( $passport['fastreet_id'] ),'id','text');
         return $this->render( 'MeterEdit', ['model'=>$meter, 'passport'=>$passport, 'mtypes'=>$mtypes, 
-                                            'regions'=>$Regions, 'streets'=>$Streets, 'fasilities'=>$Fasilities ] );
+                              'regions'=>$Regions, 'streets'=>$Streets, 'fasilities'=>$Fasilities ] );
     }
 
     // Ввод нового счетчика
