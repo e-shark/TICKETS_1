@@ -71,8 +71,8 @@ class MeterController extends Controller
             $meter = new Meter($MeterId);
             $filename = $meter->GetReadingPhotoFileName($ReadingId);
             if (file_exists($filename)) {
-                Yii::$app->response->headers->set('Content-Type', 'image/jpeg');
-                Yii::$app->response->sendFile($filename,'picture'.$MeterId.'_'.$ReadingId,['inline'=>"1"]);
+                $path_parts = pathinfo($filename);
+                Yii::$app->response->sendFile($filename, $path_parts["basename"], ['inline'=>"1"]);
             }   
         };    
     }
