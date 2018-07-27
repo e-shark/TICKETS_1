@@ -22,26 +22,88 @@ class FitterMetersList extends Model
 	function __construct( $config = []) {
 		parent::__construct( $config);	
 		$this->oprights = Tickets::getUserOpRights();
-		if( FALSE === strpos($this->oprights['oprights'],'F' ) ) {
+		if( FALSE !== strpos($this->oprights['oprights'],'F' ) ) {
+            // определили, что пользователь - это механик
 			$this->fitter = $this->oprights['id'];
 		}
 	}
 
-	// Заполняем модель данными из запроса
-	// и формирует строку фильтра для запроса SELECT
-	public static function FillFilterParams( &$model, $params)
+	// Формирует строку фильтра для запроса SELECT
+	// и з аполняем модель данными из запроса.
+	// model - ссылка на модель (сюда загружаются значения из параметров запоса)
+	// params - массив параметров запроса
+	// isfitter - признак, что юзер - это механик
+	public function FillFilterParams( &$model, $params, $isfitter = false)
 	{
-		Yii::warning("************************************************queryParams***********************[\n".json_encode($params)."\n]");
+		Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
 
-		//--- механик, к которому закреплена шитовая, к которой относится счетчика
-		if( array_key_exists('fitter',$model->attributes ) ) {
+		if ($isfitter){
+			if (!is_null($params['assigned'])) 
+				$model->assigned  =  $params['assigned'];
+			else{	
+				//Флаг либо выключен, либо просто первый раз на странице
+				//Если первый раз на странице, то не будет и другого параметра
+				if (is_null($params['datapresent'])) 
+					// значит первый раз на странице
+					// Ставим значение флага по умолчанию
+					$model->assigned  =  1;
+			}	
+
+			if ($model->assigned && (!empty($model->fitter)))
+				$filtersql	.=" and fitter = ".$model->fitter;
+		}else{
 			if (!empty($params['fitter'])) {
 				$model->fitter  =  $params['fitter'];
 				$filtersql	.=" and fitter = ".$model->fitter;
 			}
 		}
+
+		//--- Наличие текущих показаний 
+		if (!empty($params['datapresent'])) {
+			$model->datapresent = $params['datapresent'];
+			switch($model->datapresent){
+			case 1: $filtersql	.=" and A_mtime IS NOT NULL";
+			case 2: $filtersql	.=" and A_mtime IS NULL";
+			}
+		}
+
+		//--- Запоминаем поля адреса
+		$model->facility = null;
+		if (!empty($params['facility'])) {
+			$model->facility = $params['facility'];
+		}
+		$model->street = null;
+		if (!empty($params['street'])) {
+			$model->street = $params['street'];
+		}
+		$model->district = null;
+		if (!empty($params['district'])) {
+			$model->district = $params['district'];
+		}
+
+		//-- Собираем фильтр адреса
+		if(!empty($model->facility))
+			$filtersql	.=" and meterfacility_id = ".$model->facility;
+		else
+			if(!empty($model->street))
+				$filtersql	.=" and fastreet_id = ".$model->street;
+			else	
+				if(!empty($model->district))
+					$filtersql	.=" and fadistrict_id = ".FitterMetersList::getRegionID($model->district);
+
+		Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
 		return $filtersql;
 
+	}
+
+	// Возвращает ID района по его коду
+	public static function getRegionID($RegionCode)
+	{
+		$result = null;
+		$sql = "SELECT * FROM district d where d.districtcode = :rcode ;";
+		if( !empty($RegionCode))
+			$res = Yii::$app->db->createCommand($sql)->bindValues([':rcode'=>$RegionCode])->queryOne()['id'];
+		return $res;
 	}
 
 	// Возвращает код района, в котором находятся щитовые, закрепленные за механиком
@@ -54,16 +116,18 @@ class FitterMetersList extends Model
         	->queryOne()['districtcode'];
 	}
 
-	public function GetMeterList()
+	// Возвращает список счетчиков
+	// Использует фильтр, на основе параметров запроса
+	public function GetMeterList($filter)
 	{
-		$filter = FitterMetersList::FillFilterParams($this, Yii::$app->request->queryParams);
 		$sqltext = 
-"SELECT dd.*, 
-		(select e.elperson_id from elevator e where e.eldevicetype = 10 and e.elfacility_id=dd.meterfacility_id limit 1) as fitter,
+"SELECT dd.*,
+        (select e.elperson_id from elevator e where e.eldevicetype = 10 and e.elfacility_id=dd.meterfacility_id limit 1) as fitter,
+        fastreet_id, fadistrict_id, 
         concat(' ',ifnull(st.streettype,''),' ', ifnull(st.streetname,''),' ', ifnull(fa.faaddressno,''), IF(IFNULL(dd.meterporchno,0), concat(' ?.',dd.meterporchno),'') ) as addrstr ,
-        a.A_mtime, a.A_mdata, a.A_mwho, a.A_mfile, a.A_mstate, a.A_mcomment, a.A_tid, -- A текущие
-        b.B_mtime, b.B_mdata, b.B_mwho, b.B_mfile, b.B_mstate, b.B_mcomment, b.B_tid, -- В предыдущие
-        c.C_mtime, c.C_mdata, c.C_mwho, c.C_mfile, c.C_mstate, c.C_mcomment, c.C_tid  -- С старые
+        a.A_mtime, a.A_mdata, a.A_mwho, a.A_mfile, a.A_mstate, a.A_mcomment, a.A_tid,  -- A текущие
+        c.C_mtime, c.C_mdata, c.C_mwho, c.C_mfile, c.C_mstate, c.C_mcomment, c.C_tid,  -- С предыдущие
+        b.B_mtime, b.B_mdata, b.B_mwho, b.B_mfile, b.B_mstate, b.B_mcomment, b.B_tid   -- В старые
  FROM  (SELECT * FROM powermeter p) dd
  LEFT OUTER JOIN (
 	SELECT 	n.mdatameter_id A_id, n.mdatatime A_mtime, n.mdata A_mdata,

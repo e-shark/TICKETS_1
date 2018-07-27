@@ -26,13 +26,17 @@ class MeterController extends Controller
     // Отображает список счетчиков для монтера
     public function actionFitterMetersList()
     {
+        $isfitter = false;
         $meterlist = new FitterMetersList();
         //$meterlist->district = '6310136600';
-        $meterlist->assigned = true;
+        //$meterlist->assigned = true;
         if( FALSE !== strpos($meterlist->oprights['oprights'],'F' ) ) {
+            // определили, что пользователь - это механик
+            $isfitter = true;
             $meterlist->district = FitterMetersList::getFitterDistrictCodeBySB( $meterlist->oprights['id'] );
-        }
-        $provider = $meterlist->GetMeterList();
+        } 
+        $filter = $meterlist->FillFilterParams($meterlist, Yii::$app->request->queryParams, $isfitter);
+        $provider = $meterlist->GetMeterList($filter);
         return $this->render( 'FitterMetersList', ['provider'=>$provider, 'model'=>$meterlist]  );
     }   
 

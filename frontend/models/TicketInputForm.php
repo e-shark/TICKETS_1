@@ -37,17 +37,34 @@ class TicketInputForm extends Model
 		return $vtiRegions;
 	}
 
-	// Получить список улиц для района
-	//	StreetID - ID улицы. Если ID района не задан, дает список всех улиц 
-	//  f_all - добавить в список пункт 'все' (для вормирования списков выбора)
-	public static function getStreetsList( $RegionID = 0 , $f_all=false)
+	// Получить список улиц для района (по коду района)
+	//	RegionCode - Код района. Если код района не задан, дает список всех улиц 
+	//  f_all - добавить в список пункт 'все' (для формирования списков выбора)
+	public static function getStreetsList( $RegionCode = 0 , $f_all=false)
 	{
-		//$RegionName = Yii::$app->db->createCommand('SELECT districtname FROM district where districtlocality_id=159 and districtcode ='.$RegionID.';')->queryOne()["districtname"];	
+		//$RegionName = Yii::$app->db->createCommand('SELECT districtname FROM district where districtlocality_id=159 and districtcode ='.$RegionCode.';')->queryOne()["districtname"];	
 		//$vStreets =  Yii::$app->db->createCommand('SELECT id, streetname as text FROM street where streetdistrict like "'.$RegionName.'";')->queryAll();	
 		$sql = "SELECT distinct street.id, concat(' ',ifnull(street.streettype,''),' ', ifnull(street.streetname,'')) as text FROM facility
 				left join district on facility.fadistrict_id= district.id
 				left join street on facility.fastreet_id=street.id 
-				".( empty($RegionID) ? "" : "where district.districtcode = ".$RegionID )."
+				".( empty($RegionCode) ? "" : "where district.districtcode = ".$RegionCode )."
+				order by streetname ";
+		$vStreets =  Yii::$app->db->createCommand($sql)->queryAll();	
+		if ($f_all) array_unshift($vStreets, ['id'=>0,'text'=>'все']);	// вставляем запись "все" в начало массива
+		return $vStreets;
+	}
+
+	// Получить список улиц для района (по ID района)
+	//	RegionCode - ID района. Если ID района не задан, дает список всех улиц 
+	//  f_all - добавить в список пункт 'все' (для формирования списков выбора)
+	public static function getStreetsList2( $RegionID = 0 , $f_all=false)
+	{
+		//$RegionName = Yii::$app->db->createCommand('SELECT districtname FROM district where districtlocality_id=159 and id ='.$RegionID.';')->queryOne()["districtname"];	
+		//$vStreets =  Yii::$app->db->createCommand('SELECT id, streetname as text FROM street where streetdistrict like "'.$RegionName.'";')->queryAll();	
+		$sql = "SELECT distinct street.id, concat(' ',ifnull(street.streettype,''),' ', ifnull(street.streetname,'')) as text FROM facility
+				left join district on facility.fadistrict_id= district.id
+				left join street on facility.fastreet_id=street.id 
+				".( empty($RegionID) ? "" : "where district.id = ".$RegionID )."
 				order by streetname ";
 		$vStreets =  Yii::$app->db->createCommand($sql)->queryAll();	
 		if ($f_all) array_unshift($vStreets, ['id'=>0,'text'=>'все']);	// вставляем запись "все" в начало массива
@@ -129,6 +146,18 @@ class TicketInputForm extends Model
 		return  Yii::$app->db->createCommand('SELECT id, concat( ifnull(lastname,"")," ",ifnull(firstname,"")," ",ifnull(patronymic,"")) as text FROM employee WHERE oprights LIKE "%F%" ORDER BY lastname;')->queryAll();	
     }
 
+	// Получить список монтеров с прикрепленными щитовыми
+    public static function getFittersWithSBList()
+    {
+    	$sql = 'SELECT el.elperson_id as id, 
+				concat( ifnull(emp.lastname,"")," ",ifnull(emp.firstname,"")," ",ifnull(emp.patronymic,"")) as text
+				from employee emp, elevator el  
+				where emp.id = el.elperson_id
+				  and el.eldevicetype = 10
+				group by  el.elperson_id 
+				order by emp.lastname;';
+		return  Yii::$app->db->createCommand($sql)->queryAll();	
+    }
 
 	// Получить список исполнителей подразделения
     public static function getExecutantsList($DivisionID)

@@ -33,13 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => Yii::t('meter','Date'),
-                'attribute' => 'B_mtime',
+                'attribute' => 'C_mtime',
             ],
             [
                 'label' => Yii::t('meter','Readings')."<br>".Yii::t('meter','previous'),
                 'encodeLabel' => false,
                 'content' => function($data){
-                    return "<a href=".Url::toRoute(['meter/enter-reading']).'&MeterId='.$data['id'].(is_null($data['B_mdata'])?' class="not-set"':'').' >'.(is_null($data['B_mdata'])?"(не задано)":$data['B_mdata']).'</a>';
+                    return "<span".(is_null($data['C_mdata'])?' class="not-set"':'').' >'.(is_null($data['C_mdata'])?"(не задано)":$data['C_mdata']).'</a>';
                 }
             ],
 
@@ -59,8 +59,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('meter','Difference'),
                 'attribute' => 'A_mtime',
                 'content' => function($data){
-                    if (!(is_null($data['A_mdata']) || is_null($data['A_mdata']))){
-                        $res = $data['A_mdata'] - $data['B_mdata'];
+                    if (!(is_null($data['C_mdata']) || is_null($data['A_mdata']))){
+                        $res = $data['A_mdata'] - $data['C_mdata'];
                     }else{ $res = "-"; }
                     return $res;
                 }
@@ -75,6 +75,5 @@ $this->params['breadcrumbs'][] = $this->title;
 		]);
 	?>
 
-    <?php echo Html::a(Yii::t('meter','Add meter'), Url::toRoute(['meter/meter-edit']), ['class' =>'submit btn btn-success']); ?>
 </div>	
 
