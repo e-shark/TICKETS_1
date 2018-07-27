@@ -17,7 +17,7 @@ class MetersList extends Model
 	//public $dateless;	
 	public $serial;	
 	public $type;	
-	public $mothloadfrom;
+	public $monthloadfrom;
 
 	public static function FillFilterParams( &$model, $params)
 	{

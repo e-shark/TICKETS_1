@@ -19,14 +19,23 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
     <?php echo Html::hiddenInput('RefUrl', $refurl); ?>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
             <div class="input-group">
-                <span class="input-group-addon">Дата снятия показаний</span>
-                <?php echo DatePicker::widget(['name'  => 'MeterDateTime', 
+                <span class="input-group-addon">Дата </span>
+                <?php echo DatePicker::widget(['name'  => 'MeterDate', 
                                     'value'  => date("d-m-Y"),
                                     'dateFormat' => 'dd-MM-yyyy',
                                     'options'=>['class'=>'form-control']]);
                 ?>                
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-addon">Время </span>
+                    <?php //$ts = ["00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"]; ?>
+                    <?php $ts=""; for($i=0;$i<24;$i++) $ts[]=sprintf( "%02d:00", $i); ?>
+                    <?php echo Html::dropDownList('MeterTime', date("H"), $ts, ['id'=>'MeterTime','class'=>'form-control','onChange'=>'onSelectRegion()']); ?> 
             </div>
         </div>
 

@@ -30,31 +30,42 @@ class TicketInputForm extends Model
 		return $vtiProblems;
 	}
 
+	// Получить список районов
 	public static function getTiRegions()
 	{
 		$vtiRegions = Yii::$app->db->createCommand('SELECT districtname, districtcode FROM district where districtlocality_id=159;')->queryAll();	
 		return $vtiRegions;
 	}
 
-	public static function getStreetsList( $RegionID = 0 )
+	// Получить список улиц для района
+	//	StreetID - ID улицы. Если ID района не задан, дает список всех улиц 
+	//  f_all - добавить в список пункт 'все' (для вормирования списков выбора)
+	public static function getStreetsList( $RegionID = 0 , $f_all=false)
 	{
 		//$RegionName = Yii::$app->db->createCommand('SELECT districtname FROM district where districtlocality_id=159 and districtcode ='.$RegionID.';')->queryOne()["districtname"];	
 		//$vStreets =  Yii::$app->db->createCommand('SELECT id, streetname as text FROM street where streetdistrict like "'.$RegionName.'";')->queryAll();	
-		$sql = "SELECT distinct street.id, street.streetname as text FROM elevators.facility
+		$sql = "SELECT distinct street.id, concat(' ',ifnull(street.streettype,''),' ', ifnull(street.streetname,'')) as text FROM facility
 				left join district on facility.fadistrict_id= district.id
 				left join street on facility.fastreet_id=street.id 
-				where district.districtcode = '$RegionID'
+				".( empty($RegionID) ? "" : "where district.districtcode = ".$RegionID )."
 				order by streetname ";
 		$vStreets =  Yii::$app->db->createCommand($sql)->queryAll();	
+		if ($f_all) array_unshift($vStreets, ['id'=>0,'text'=>'все']);	// вставляем запись "все" в начало массива
 		return $vStreets;
 	}
 
-	public static function getFacilitiesList( $StreetID = 0)
+	// Получить список домов на улице
+	//	StreetID - ID улицы
+	//  f_all - добавить в список пункт 'все' (для вормирования списков выбора)
+	public static function getFacilitiesList( $StreetID = 0, $f_all=false)
 	{
-		$vStreets =  Yii::$app->db->createCommand('SELECT facility.id, coalesce(concat(faaddressno," ","сек.",fasectionno),faaddressno) as text FROM street join facility on   fastreet_id = street.id where street.id ='.$StreetID.';')->queryAll();	
+		if (empty($StreetID)) $StreetID = 0;
+		$vStreets =  Yii::$app->db->createCommand('SELECT facility.id, coalesce(concat(faaddressno," ","сек.",fasectionno),faaddressno) as text FROM street join facility on fastreet_id = street.id where street.id ='.$StreetID.';')->queryAll();	
+		if ($f_all) array_unshift($vStreets, ['id'=>0,'text'=>'все']);	// вставляем запись "все" в начало массива
 		return $vStreets;
 	}
 
+	// Получить список возможных неисправностей
 	public static function getProblemsList( $ObjectId = 0)
 	{
 		$ObjectName =  Yii::$app->db->createCommand('SELECT tiobject, tiobjectcode FROM ticketobject WHERE tiobjectcode = '.$ObjectId.';')->queryOne()['tiobject'];
@@ -89,6 +100,9 @@ class TicketInputForm extends Model
    		return $input ;
 	}
 
+	// Получить список лифтов в доме
+	// 	FacilityId - ID дома
+	//  EntranceId - номер (буква) подъезда
 	public static function getElevatorsList( $FacilityId = 0, $EntranceId=0)
 	{
 		$Elevators =  Yii::$app->db->createCommand('SELECT id, concat(ifnull(elporchpos,"")," ", ifnull(eltype,"")) as text FROM elevator WHERE elfacility_id = '.$FacilityId.' and elporchno = '.$EntranceId.' and eldevicetype = 1;')->queryAll();
@@ -97,6 +111,9 @@ class TicketInputForm extends Model
 		return $res;
 	}
 
+	// Получить список щитовых в доме
+	// 	FacilityId - ID дома
+	//  EntranceId - номер (буква) подъезда
 	public static function getSwichboardList( $FacilityId = 0, $EntranceId=0)
 	{
 		$Elevators =  Yii::$app->db->createCommand('SELECT id, concat("№",ifnull(elinventoryno,"")) as text FROM elevator WHERE elfacility_id = '.$FacilityId.' and elporchno = '.$EntranceId.' and eldevicetype = 10;')->queryAll();
@@ -105,11 +122,21 @@ class TicketInputForm extends Model
 		return $res;
 	}
 
+
+	// Получить список монтеров
+    public static function getFittersList()
+    {
+		return  Yii::$app->db->createCommand('SELECT id, concat( ifnull(lastname,"")," ",ifnull(firstname,"")," ",ifnull(patronymic,"")) as text FROM employee WHERE oprights LIKE "%F%" ORDER BY lastname;')->queryAll();	
+    }
+
+
+	// Получить список исполнителей подразделения
     public static function getExecutantsList($DivisionID)
     {
 		return  Yii::$app->db->createCommand('SELECT id, concat( ifnull(lastname,"")," ",ifnull(firstname,"")," ",ifnull(patronymic,"")) as text FROM employee WHERE division_id = '.$DivisionID.' ORDER BY lastname;')->queryAll();	
     }
 
+	// Получить список исполнителей для ЛАС
 	public static function getExecutantsListForLAS()
 	{
 		$res = [];

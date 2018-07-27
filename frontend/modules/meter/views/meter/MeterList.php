@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('meter','Readings'),
                 //'attribute' => 'mdata',
                 'content' => function($data){
-                    return "<a href=".Url::toRoute(['meter/enter-reading']).'&MeterId='.$data['id'].(empty($data['mdata'])?' class="not-set"':'').' >'.(empty($data['mdata'])?"(не задано)":$data['mdata']).'</a>';
+                    return "<a href=".Url::toRoute(['meter/enter-reading']).'&MeterId='.$data['id'].(is_null($data['mdata'])?' class="not-set"':'').' >'.(is_null($data['mdata'])?"(не задано)":$data['mdata']).'</a>';
                 }
             ],
         ];

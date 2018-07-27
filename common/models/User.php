@@ -186,4 +186,9 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
+    public static function getUsersList()
+    {
+        return static::find()->all();;
+    }
 }

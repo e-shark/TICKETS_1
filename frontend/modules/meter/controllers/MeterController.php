@@ -9,11 +9,12 @@ use yii\helpers\ArrayHelper;
 use frontend\models\TicketInputForm;
 use frontend\modules\meter\models\Meter;
 use frontend\modules\meter\models\MetersList;
+use frontend\modules\meter\models\FitterMetersList;
 
 class MeterController extends Controller
 {
 
-    // Отображение списка счетчика
+    // Отображение списка всех счетчиков
 	public function actionIndex()	
     {
         $meterlist = new MetersList();
@@ -21,6 +22,19 @@ class MeterController extends Controller
         $provider = $meterlist->GetMeterList();
         return $this->render( 'MeterList', ['provider'=>$provider, 'model'=>$meterlist]  );
     }
+
+    // Отображает список счетчиков для монтера
+    public function actionFitterMetersList()
+    {
+        $meterlist = new FitterMetersList();
+        //$meterlist->district = '6310136600';
+        $meterlist->assigned = true;
+        if( FALSE !== strpos($meterlist->oprights['oprights'],'F' ) ) {
+            $meterlist->district = FitterMetersList::getFitterDistrictCodeBySB( $meterlist->oprights['id'] );
+        }
+        $provider = $meterlist->GetMeterList();
+        return $this->render( 'FitterMetersList', ['provider'=>$provider, 'model'=>$meterlist]  );
+    }   
 
     // Отображение паспорта счетчика
 	public function actionMeterInfo($MeterId = 0 )	
@@ -37,12 +51,19 @@ class MeterController extends Controller
     {
         if (Yii::$app->request->isPost) {
             $data = Yii::$app->request->post();
-            try{$MeterDateTime=Yii::$app->formatter->asDatetime($data['MeterDateTime'],'yyyy-MM-dd');}catch(\Exception $e){ $MeterData=date("Y-m-d");}
+            if ( empty($data['MeterTime']) ) $data['MeterTime'] = 0;
+            try{
+                $MeterDateTime = Yii::$app->formatter->asDatetime($data['MeterDate'],'yyyy-MM-dd');
+                $MeterDateTime .= sprintf( " %02d:00", $data['MeterTime'] );
+            } 
+            catch(\Exception $e){ 
+                $MeterData=date("Y-m-d H:i:s");
+            }
             $MeterId = $data['MeterId'];
-            $MeterData = $data['MeterData'];
+            $MeterData = floor( $data['MeterData'] );
             $MeterPhoto = UploadedFile::getInstanceByName('imageFile');
             $RefUrl = $data['RefUrl'];
-            if ( (!empty($MeterId)) && (!empty($MeterData)) ) {
+            if ( (!empty($MeterId)) && (!is_null($MeterData)) ) {
                 $meter = new Meter($MeterId);
                 $meter->SaveReading($MeterDateTime, $MeterData, $MeterPhoto);
             }
@@ -71,7 +92,7 @@ class MeterController extends Controller
             $meter = new Meter($MeterId);
             $filename = $meter->GetReadingPhotoFileName($ReadingId);
             if (file_exists($filename)) {
-                $path_parts = pathinfo($filename);
+                $path_parts = pathinfo($filename);                                                      // вынимаем имя файла (без пути) 
                 Yii::$app->response->sendFile($filename, $path_parts["basename"], ['inline'=>"1"]);
             }   
         };    

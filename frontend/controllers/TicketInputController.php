@@ -40,7 +40,7 @@ class TicketInputController extends Controller
             $data = Yii::$app->request->post();
             if (! empty($data)){
                 $RegionID =  0 + $data['District'];
-                $res = json_encode(TicketInputForm::getStreetsList($RegionID));
+                $res = json_encode(TicketInputForm::getStreetsList($RegionID, $data['f_all']));
             }
         }
         return $res;
@@ -54,7 +54,7 @@ class TicketInputController extends Controller
             $data = Yii::$app->request->post();
             if (! empty($data)){
                 $StreetId =  0 + $data['StreetId'];
-                $res = json_encode(TicketInputForm::getFacilitiesList($StreetId));
+                $res = json_encode(TicketInputForm::getFacilitiesList($StreetId, $data['f_all']));
             }
         }
         return $res;
