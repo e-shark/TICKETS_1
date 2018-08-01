@@ -35,7 +35,8 @@ class FitterMetersList extends Model
 	// isfitter - признак, что юзер - это механик
 	public function FillFilterParams( &$model, $params, $isfitter = false)
 	{
-		//Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
+		Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
+		Yii::warning("************************************************params***********************[\n".json_encode($params)."\n]");
 
 		if ($isfitter){
 			if (!is_null($params['assigned'])) 
@@ -62,8 +63,8 @@ class FitterMetersList extends Model
 		if (!empty($params['datapresent'])) {
 			$model->datapresent = $params['datapresent'];
 			switch($model->datapresent){
-			case 1: $filtersql	.=" and A_mtime IS NOT NULL";
-			case 2: $filtersql	.=" and A_mtime IS NULL";
+			case 1: $filtersql	.=" and A_mtime IS NOT NULL"; break;
+			case 2: $filtersql	.=" and A_mtime IS NULL"; break;
 			}
 		}
 
@@ -91,7 +92,7 @@ class FitterMetersList extends Model
 				if(!empty($model->district))
 					$filtersql	.=" and fadistrict_id = ".FitterMetersList::getRegionID($model->district);
 
-		//Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
+		Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
 		return $filtersql;
 
 	}
@@ -140,9 +141,9 @@ class FitterMetersList extends Model
 			n.mdatafile A_mfile, n.mdatameterstate A_mstate, n.mdatacomment A_mcomment, n.id A_tid, n.mdatadeltime, n.mdatacode
 	FROM powermeterdata n,
     	(	SELECT MAX(pp.id) id 
-      		FROM (	SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime > :DP2 AND mdatadeltime IS NULL ) pp, 
+      		FROM (	SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime >= :DP2 AND mdatadeltime IS NULL ) pp, 
 				 ( SELECT MAX(p.mdatatime) t, p.mdatameter_id id
-							  FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime > :DP2 AND  mdatadeltime IS NULL) p 
+							  FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime >= :DP2 AND  mdatadeltime IS NULL) p 
                               GROUP BY p.mdatameter_id
                  ) g 
 			WHERE pp.mdatameter_id = g.id AND pp.mdatatime = g.t GROUP BY g.id
@@ -164,9 +165,9 @@ LEFT OUTER JOIN (
 LEFT OUTER JOIN (
    SELECT ppp.mdatameter_id C_id, ppp.mdatatime C_mtime, ppp.mdata C_mdata,     (SELECT concat(e.lastname,' ',e.firstname,' ',e.patronymic) FROM employee e, powermeterdata pm  WHERE pm.mdatawho=e.id AND  pm.id = gg.id ) C_mwho, ppp.mdatafile C_mfile, ppp.mdatameterstate C_mstate, ppp.mdatacomment C_mcomment, ppp.id C_tid, ppp.mdatadeltime, ppp.mdatacode
    FROM powermeterdata ppp,
-    (SELECT MAX(pp.id) id FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND (mdatatime > :DP1 and mdatatime <= :DP2) AND mdatadeltime IS NULL ) pp, 
+    (SELECT MAX(pp.id) id FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND (mdatatime >= :DP1 and mdatatime < :DP2) AND mdatadeltime IS NULL ) pp, 
        (	SELECT MAX(p.mdatatime) t, p.mdatameter_id id
-        	FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND (mdatatime > :DP1 and mdatatime <= :DP2) AND  mdatadeltime IS NULL) p 
+        	FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND (mdatatime >= :DP1 and mdatatime < :DP2) AND  mdatadeltime IS NULL) p 
         	GROUP BY p.mdatameter_id
         ) g 
        WHERE pp.mdatameter_id = g.id AND pp.mdatatime = g.t GROUP BY g.id) gg
@@ -177,7 +178,7 @@ JOIN street st on st.id=fa.fastreet_id
 ORDER BY 1 ";
 		$sqltext = "SELECT s.* FROM ( ".$sqltext." ) s WHERE id>0 ".$filter ; 
 		//Yii::warning("************************************************SQL*******************************[\n".$sqltext."\n]");
-		//Yii::warning("************************************************filter****************************[\n".$filter."\n]");
+		Yii::warning("************************************************filter****************************[\n".$filter."\n]");
 		$provider = new SqlDataProvider([
 			'sql' => $sqltext,
 			'params' => [

@@ -4,6 +4,7 @@ return[
 'Meter list' => 'Список счетчиков',
 'Meter passport' => 'Информация по счетчику',
 'Meter readings' => 'Показания счетчика',
+'Meter' => 'Счетчик',
 'Date' => 'Дата',
 'Readings' => 'Показания',
 'Photo' => 'Фотография',

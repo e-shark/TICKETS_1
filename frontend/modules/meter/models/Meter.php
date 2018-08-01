@@ -65,9 +65,9 @@ class Meter extends Model
 		$sqltext=  "SELECT ppp.mdatameter_id, ppp.mdatatime, ppp.mdata, ppp.mdatafile, (SELECT concat(e.lastname,' ',e.firstname,' ',e.patronymic) FROM employee e, powermeterdata pm  WHERE pm.mdatawho=e.id AND  pm.id = gg.id ) mwho, ppp.mdatafile, ppp.mdatameterstate, ppp.mdatacomment, ppp.id rec_id, ppp.mdatadeltime, ppp.mdatacode
 					FROM powermeterdata ppp,
 					  (SELECT MAX(pp.id) id 
-      				   FROM (	SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime > :DP AND mdatadeltime IS NULL ) pp, 
+      				   FROM (	SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime >= :DP AND mdatadeltime IS NULL ) pp, 
 				 			( SELECT MAX(p.mdatatime) t, p.mdatameter_id id
-							  FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime > :DP AND  mdatadeltime IS NULL) p 
+							  FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime >= :DP AND  mdatadeltime IS NULL) p 
                               GROUP BY p.mdatameter_id
                  			) g 
 					   WHERE pp.mdatameter_id = g.id AND pp.mdatatime = g.t GROUP BY g.id) gg
@@ -78,7 +78,7 @@ class Meter extends Model
 			$TS = Yii::$app->formatter->asDatetime( strtotime( $TS." -1 month" ) ,'yyyy-MM-dd H:i:s');
    		$cmd = Yii::$app->db->createCommand($sqltext);
    		$cmd ->bindValues([':MID'=>$mid, ':OBIS'=>'1.8.0', ':DP'=>$TS]);
-Yii::warning("************************************************cmd***********************[\n".$cmd->rawSql."\n]");
+//Yii::warning("************************************************cmd***********************[\n".$cmd->rawSql."\n]");
 		return $cmd->queryOne();
 	}
 
@@ -129,6 +129,25 @@ Yii::warning("************************************************cmd***************
 			$who = $oprights['id'];
 			$sql = "UPDATE powermeterdata SET mdatadeltime = '{$now}', mdatadelwho = {$who} WHERE id=".$recordid;
 			Yii::$app->db->createCommand($sql)->execute();
+		}
+	}
+
+	// Удаление записи с показаниями за текущий период (с 10 числа по текущее)
+	public function DeleteAllCurrentReading()
+	{
+		$oprights = Tickets::getUserOpRights();
+		if( !empty($oprights) && !empty($this->MeterId) ) {
+			$dateperiod = 10;
+			$TS = Yii::$app->formatter->asDatetime( mktime(0, 0, 0, date("m"), $dateperiod, date("Y")) ,'yyyy-MM-dd H:i:s');
+			if (date("d") < $dateperiod)
+				$TS = Yii::$app->formatter->asDatetime( strtotime( $TS." -1 month" ) ,'yyyy-MM-dd H:i:s');
+			$now = date("Y-m-d H:i:s");
+			$who = $oprights['id'];
+			$sql = "UPDATE powermeterdata SET mdatadeltime = :now, mdatadelwho = :who WHERE mdatameter_id =:mid and mdatatime >= :ts ;";
+			$cmd = Yii::$app->db->createCommand($sql);
+			$cmd->bindValues([ ':mid'=>0+$this->MeterId, 'ts'=>$TS, 'now'=>$now, 'who'=>$who ]);
+//Yii::warning("************************************************cmd***********************[\n".$cmd->rawSql."\n]");
+			$cmd->execute();
 		}
 	}
 

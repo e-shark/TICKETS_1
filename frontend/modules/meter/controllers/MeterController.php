@@ -85,8 +85,17 @@ class MeterController extends Controller
             $meter = new Meter($MeterId);
             $meter->DeleteReading($ReadingId);
         }
-
         return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);
+    }
+
+    // Удаляет все текущие показания (все показания с 10 по текущее число)
+    public function actionDeleteAllCurrent( $MeterId=0 )  
+    {
+        if ( !empty($MeterId) ) {
+            $meter = new Meter($MeterId);
+            $meter->DeleteAllCurrentReading($MeterId);
+        }
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     // Получить фотографию показаний

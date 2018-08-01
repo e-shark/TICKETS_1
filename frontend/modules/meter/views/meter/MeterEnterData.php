@@ -21,12 +21,16 @@ $this->params['breadcrumbs'][] = $this->title;
   <div class="panel-heading"><?php echo Html::label(Yii::t('meter','Last readings')); ?></div>
   <div class="panel-body">
     <?php  if (!empty($LastReading)) {  ?>
+
+        <?php //Метка времени ?>
         <div class="col-md-1"> <?php echo Html::label(Yii::t('meter','Date')." :"); ?> </div>
         <div class="col-md-2 alert alert-info"> <?php echo Html::label( $LastReading['mdatatime']  ); ?> </div>
 
+        <?php //показания ?>
         <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Readings')." :"); ?> </div>
         <div class="col-md-1 alert alert-info"> <?php echo Html::label( $LastReading['mdata']  ); ?> </div>
 
+        <?php //ссылка на фотографию ?>
         <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Photo')." :"); ?> </div>
         <div class="col-md-1 alert alert-info">
             <?php  if (!empty( $LastReading['mdatafile'])) { 
@@ -34,19 +38,19 @@ $this->params['breadcrumbs'][] = $this->title;
             } ?>
         </div>
 
+        <?php //Разделитель ?>
         <div class="col-md-1"> </div>
 
+        <?php //Кнопка "Удалить все показания текущего периода" ?>
         <div class="col-md-1"> 
             <button class="btn btn-outline-primary btn-lg">
                 <?php echo Html::a(
-                    //'<span class="glyphicon glyphicon-remove" style="color: red;"></span>',
                     '<i class="glyphicon glyphicon-remove" style="color: red;"></i>',
-                    Url::to(['delete-reading', 'MeterId'=>$LastReading['mdatameter_id'],'ReadingId' => $LastReading['rec_id']]),
+                    Url::to(['delete-all-current', 'MeterId'=>$LastReading['mdatameter_id'],'ReadingId' => $LastReading['rec_id']]),
                     ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')]
                 ); ?>
             </button>
          </div>
-
 
     <?php } ?>
 
