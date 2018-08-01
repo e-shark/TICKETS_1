@@ -134,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'content' => function($model) {
                     return Html::a(
                         //'<span class="glyphicon glyphicon-trash" style="color: red;">',
-                        '<span class="glyphicon glyphicon-remove" style="color: red;">',
+                        '<span class="glyphicon glyphicon-remove" style="color: red;"></span>',
                         Url::to(['delete-reading', 'MeterId'=>$model['mdatameter_id'],'ReadingId' => $model['id']]),
                         ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')]
                     );

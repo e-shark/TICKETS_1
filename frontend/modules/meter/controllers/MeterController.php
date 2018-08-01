@@ -108,7 +108,9 @@ class MeterController extends Controller
         if (!empty($MeterId)) {
             $meter = new Meter($MeterId);
             $passport = $meter->GetMeterPassport($MeterId);
-            return $this->render( 'MeterEnterData', [ 'model' => $meter, 'passport'=>$passport, 'refurl'=>(Yii::$app->request->referrer ?: Yii::$app->homeUrl) ]);
+            $LastReading = $meter->GetLastReading($MeterId);
+//Yii::warning("************************************************LastReading***********************[\n".json_encode($LastReading)."\n]");            
+            return $this->render( 'MeterEnterData', [ 'model' => $meter, 'passport'=>$passport, 'LastReading'=>$LastReading ,'refurl'=>(Yii::$app->request->referrer ?: Yii::$app->homeUrl) ]);
         } else 
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }

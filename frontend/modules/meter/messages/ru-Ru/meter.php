@@ -39,4 +39,5 @@ return[
 'current' => 'текущие',
 'previous' => 'предидущие',
 'Difference' => 'Разница',
+'Last readings'  => 'Последние показания',
 ];

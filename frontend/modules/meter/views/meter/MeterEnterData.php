@@ -3,6 +3,7 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\jui\DatePicker;
+use himiklab\colorbox\Colorbox;
 
 $this->title = Yii::t('meter','Input of readings')." ".Yii::t('meter','for meter')." ".$passport['meterserialno'];
 $this->params['breadcrumbs'][] = $this->title;
@@ -10,10 +11,51 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <h1><?= Html::encode($this->title) ?></h1>
 
+    <div class="row">
+        <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Address')." :"); ?> </div>
+        <div class="col-md-7<?php echo " alert alert-info" ?>"> <?php echo Html::label( ($passport['addrstr']) ); ?> </div>
+
+    </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading"><?php echo Html::label(Yii::t('meter','Last readings')); ?></div>
+  <div class="panel-body">
+    <?php  if (!empty($LastReading)) {  ?>
+        <div class="col-md-1"> <?php echo Html::label(Yii::t('meter','Date')." :"); ?> </div>
+        <div class="col-md-2 alert alert-info"> <?php echo Html::label( $LastReading['mdatatime']  ); ?> </div>
+
+        <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Readings')." :"); ?> </div>
+        <div class="col-md-1 alert alert-info"> <?php echo Html::label( $LastReading['mdata']  ); ?> </div>
+
+        <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Photo')." :"); ?> </div>
+        <div class="col-md-1 alert alert-info">
+            <?php  if (!empty( $LastReading['mdatafile'])) { 
+                echo "<a class='meterdataphoto' href=".Url::toRoute(['meter/get-meter-photo','MeterId' => $LastReading['mdatameter_id'], 'ReadingId'=>$LastReading['rec_id'], 'type'=>'.jpeg']).'><img src="/img/camera_small.png" alt="MDN"></a>'; //.' target="_blank"
+            } ?>
+        </div>
+
+        <div class="col-md-1"> </div>
+
+        <div class="col-md-1"> 
+            <button class="btn btn-outline-primary btn-lg">
+                <?php echo Html::a(
+                    //'<span class="glyphicon glyphicon-remove" style="color: red;"></span>',
+                    '<i class="glyphicon glyphicon-remove" style="color: red;"></i>',
+                    Url::to(['delete-reading', 'MeterId'=>$LastReading['mdatameter_id'],'ReadingId' => $LastReading['rec_id']]),
+                    ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')]
+                ); ?>
+            </button>
+         </div>
+
+
+    <?php } ?>
+
+  </div>
+</div>
+
 <div class="panel panel-default">
   <div class="panel-heading"><?php echo Html::label(Yii::t('meter','Input of readings')); ?></div>
   <div class="panel-body">
-
 
 <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']],'post') ?>
     <?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
@@ -66,3 +108,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
   </div>
 </div>
+
+<?= Colorbox::widget([
+    'targets' => [
+        '.meterdataphoto' => [
+            'maxWidth' => 1000,
+            'maxHeight' => 700,
+            'opacity' => 0.6,
+        ],
+    ],
+    'coreStyle' => 4
+]) ?>

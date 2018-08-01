@@ -58,6 +58,30 @@ class Meter extends Model
 		return $result;
 	}
 
+	// Получить последние показания по счетчику по счетчику
+	public function GetLastReading($mid)
+	{
+		$dateperiod = 10;	// дата начала расчетного периода каждого месяца
+		$sqltext=  "SELECT ppp.mdatameter_id, ppp.mdatatime, ppp.mdata, ppp.mdatafile, (SELECT concat(e.lastname,' ',e.firstname,' ',e.patronymic) FROM employee e, powermeterdata pm  WHERE pm.mdatawho=e.id AND  pm.id = gg.id ) mwho, ppp.mdatafile, ppp.mdatameterstate, ppp.mdatacomment, ppp.id rec_id, ppp.mdatadeltime, ppp.mdatacode
+					FROM powermeterdata ppp,
+					  (SELECT MAX(pp.id) id 
+      				   FROM (	SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime > :DP AND mdatadeltime IS NULL ) pp, 
+				 			( SELECT MAX(p.mdatatime) t, p.mdatameter_id id
+							  FROM (SELECT * FROM powermeterdata WHERE mdatacode = :OBIS AND mdatatime > :DP AND  mdatadeltime IS NULL) p 
+                              GROUP BY p.mdatameter_id
+                 			) g 
+					   WHERE pp.mdatameter_id = g.id AND pp.mdatatime = g.t GROUP BY g.id) gg
+					WHERE ppp.id = gg.id AND mdatameter_id = :MID ;" ;
+
+		$TS = Yii::$app->formatter->asDatetime( mktime(0, 0, 0, date("m"), $dateperiod, date("Y")) ,'yyyy-MM-dd H:i:s');
+		if (date("d") < $dateperiod)
+			$TS = Yii::$app->formatter->asDatetime( strtotime( $TS." -1 month" ) ,'yyyy-MM-dd H:i:s');
+   		$cmd = Yii::$app->db->createCommand($sqltext);
+   		$cmd ->bindValues([':MID'=>$mid, ':OBIS'=>'1.8.0', ':DP'=>$TS]);
+Yii::warning("************************************************cmd***********************[\n".$cmd->rawSql."\n]");
+		return $cmd->queryOne();
+	}
+
 	// Добавляет одну запись в таблицу показаний счетчиков
 	public static function InsertReading($meterId, $who, $time, $obis, $val, $state, $comment, $filename)
 	{
@@ -82,7 +106,8 @@ class Meter extends Model
 	// Обновить дату последней поверки счетчика
 	public static function UpdateCalibrationDate($MeterId, $Date)
 	{
-		try{$dateiso=Yii::$app->formatter->asDatetime($Date,'yyyy-MM-dd');}catch(\Exception $e){ $dateiso=null;}
+		try{ $dateiso=Yii::$app->formatter->asDatetime($Date,'yyyy-MM-dd'); }
+		catch(\Exception $e){ $dateiso=null;}
 		if ( (!empty($MeterId)) && (!empty($dateiso)) ) {
 			$sqltext = "SELECT id FROM powermeterdata WHERE mdatacode='".Meter::CalibrationOBIS."' AND (mdatameter_id={$MeterId}) AND mdatatime='{$dateiso}';";
 			$id = Yii::$app->db->createCommand($sqltext)->queryOne()['id'];

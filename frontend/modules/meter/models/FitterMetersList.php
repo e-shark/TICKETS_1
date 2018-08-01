@@ -35,7 +35,7 @@ class FitterMetersList extends Model
 	// isfitter - признак, что юзер - это механик
 	public function FillFilterParams( &$model, $params, $isfitter = false)
 	{
-		Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
+		//Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
 
 		if ($isfitter){
 			if (!is_null($params['assigned'])) 
@@ -91,7 +91,7 @@ class FitterMetersList extends Model
 				if(!empty($model->district))
 					$filtersql	.=" and fadistrict_id = ".FitterMetersList::getRegionID($model->district);
 
-		Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
+		//Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
 		return $filtersql;
 
 	}
@@ -120,6 +120,11 @@ class FitterMetersList extends Model
 	// Использует фильтр, на основе параметров запроса
 	public function GetMeterList($filter)
 	{
+		$dateperiod = 10;	// дата начала расчетного периода каждого месяца
+		$TS2 = Yii::$app->formatter->asDatetime( mktime(0, 0, 0, date("m"), $dateperiod, date("Y")) ,'yyyy-MM-dd H:i:s');
+		if (date("d") >= $dateperiod)
+			$TS2 = Yii::$app->formatter->asDatetime( strtotime( $TS2." -1 month" ) ,'yyyy-MM-dd H:i:s');
+		$TS1 = Yii::$app->formatter->asDatetime( strtotime( $TS2." -1 month" ) ,'yyyy-MM-dd H:i:s');
 		$sqltext = 
 "SELECT dd.*,
         (select e.elperson_id from elevator e where e.eldevicetype = 10 and e.elfacility_id=dd.meterfacility_id limit 1) as fitter,
@@ -171,8 +176,8 @@ JOIN facility fa on fa.id = dd.meterfacility_id
 JOIN street st on st.id=fa.fastreet_id  
 ORDER BY 1 ";
 		$sqltext = "SELECT s.* FROM ( ".$sqltext." ) s WHERE id>0 ".$filter ; 
-		Yii::warning("************************************************SQL*******************************[\n".$sqltext."\n]");
-		Yii::warning("************************************************filter****************************[\n".$filter."\n]");
+		//Yii::warning("************************************************SQL*******************************[\n".$sqltext."\n]");
+		//Yii::warning("************************************************filter****************************[\n".$filter."\n]");
 		$provider = new SqlDataProvider([
 			'sql' => $sqltext,
 			'params' => [
