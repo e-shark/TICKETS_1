@@ -11,14 +11,24 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="row">
-        <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Address')." :"); ?> </div>
-        <div class="col-md-7<?php echo " alert alert-info" ?>"> <?php echo Html::label( ($passport['addrstr']) ); ?> </div>
+<div class="row">
+    <div class="col-md-2"> <?php echo Html::label(Yii::t('meter','Address')." :"); ?> </div>
+    <div class="col-md-7<?php echo " alert alert-info" ?>"> <?php echo Html::label( ($passport['addrstr']) ); ?> </div>
+</div>
 
-    </div>
-
+<?php //Блок отображения текущих показаний ?>
 <div class="panel panel-default">
-  <div class="panel-heading"><?php echo Html::label(Yii::t('meter','Last readings')); ?></div>
+  <div class="panel-heading">
+  <?php 
+    // Вычисляем дату начала расчетного периода
+    if (empty(Yii::$app->params['MeterAccauntingPeriodDayOfMonth'])) $dateperiod = 10;      
+    else $dateperiod = Yii::$app->params['MeterAccauntingPeriodDayOfMonth'];
+    $TS2 = Yii::$app->formatter->asDatetime( mktime(0, 0, 0, date("m"), $dateperiod, date("Y")) ,'yyyy-MM-dd');
+    if (date("d") < $dateperiod)
+        $TS2 = Yii::$app->formatter->asDatetime( strtotime( $TS2." -1 month" ) ,'yyyy-MM-dd');
+    echo Html::label(Yii::t('meter','Readings for the period from')."&nbsp&nbsp".$TS2); 
+  ?>
+  </div>
   <div class="panel-body">
     <?php  if (!empty($LastReading)) {  ?>
 
@@ -46,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <button class="btn btn-outline-primary btn-lg">
                 <?php echo Html::a(
                     '<i class="glyphicon glyphicon-remove" style="color: red;"></i>',
-                    Url::to(['delete-all-current', 'MeterId'=>$LastReading['mdatameter_id'],'ReadingId' => $LastReading['rec_id']]),
+                    Url::to(['delete-all-current', 'MeterId'=>$LastReading['mdatameter_id'],'ReadingId' => $LastReading['rec_id'], 'firstref'=>$firstref]),
                     ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')]
                 ); ?>
             </button>
@@ -57,13 +67,21 @@ $this->params['breadcrumbs'][] = $this->title;
   </div>
 </div>
 
+<?php //Блок ввода показаний" ?>
 <div class="panel panel-default">
-  <div class="panel-heading"><?php echo Html::label(Yii::t('meter','Input of readings')); ?></div>
+  <div class="panel-heading">
+  <?php 
+    if ( empty($LastReading['mdatatime']) )
+        echo Html::label(Yii::t('meter','Input of readings')); 
+    else
+        echo Html::label(Yii::t('meter','Edit of readings')); 
+  ?>
+  </div>
   <div class="panel-body">
 
 <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']],'post') ?>
     <?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
-    <?php echo Html::hiddenInput('RefUrl', $refurl); ?>
+    <?php echo Html::hiddenInput('RefUrl', $firstref); ?>
 
         <div class="col-md-2">
             <div class="input-group">
@@ -88,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
           <div class="input-group">
             <span class="input-group-addon">Показания</span>
-            <?php echo Html::input('text','MeterData','',['id'=>'MeterData','class'=>'form-control']); ?> 
+            <?php echo Html::input('text','MeterData', $LastReading['mdata'], ['id'=>'MeterData','class'=>'form-control']); ?> 
           </div>
         </div>
 
@@ -103,15 +121,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <div class="col-md-1">
             <div class="input-group">
-           <?= Html::submitButton(Yii::t('app','Add'), ['class'=>'submit btn btn-primary','formaction'=>Url::toRoute(['add-reading'])]) ?>
+           <?= Html::submitButton(Yii::t('meter','Enter'), ['class'=>'submit btn btn-primary','formaction'=>Url::toRoute(['add-reading'])]) ?>
             </div>
         </div>
-
 
 <?php ActiveForm::end() ?>
 
   </div>
 </div>
+<?php 
+    // кнопка "Вернуться"
+    if (empty($firstref)) echo Html::a(Yii::t('meter','Back'), Url::toRoute(['meter/fitter-meters-list']), ['class'=>'btn btn-primary']);
+    else echo Html::a(Yii::t('meter','Back'), urldecode($firstref), ['class'=>'btn btn-primary']);
+?>
 
 <?= Colorbox::widget([
     'targets' => [

@@ -68,7 +68,7 @@ class MetersList extends Model
 	{
 
 		$filter = MetersList::FillFilterParams($this, Yii::$app->request->queryParams);
-		$sqltext = "select * from (select pm.*,  md.mdatatime, md.mdata,
+		$sqltext = "SELECT * from (select pm.*,  md.mdatatime, md.mdata,
   fa.id as facility_id, st.streettype, st.streetname, fa.faaddressno, 
   concat(' ',ifnull(st.streettype,''),' ', ifnull(st.streetname,''),' ', ifnull(fa.faaddressno,''), IF(IFNULL(pm.meterporchno,0), concat(' п.',pm.meterporchno),'') ) as addrstr 
 from powermeter pm

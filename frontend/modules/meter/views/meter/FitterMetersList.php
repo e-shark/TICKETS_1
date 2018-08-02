@@ -81,6 +81,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
 
+/*
             [
                 'contentOptions' =>function ($model, $key, $index, $column){ return ['style' => 'text-align:  center;']; },
                 'content' => function($data) {
@@ -92,10 +93,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         );
                     }       
             ],
+*/            
 
             [
-                'label' => Yii::t('meter','Difference'),
-                'attribute' => 'A_mtime',
+                //'label' => "&Delta;",
+                'label' => "<div><span style='text-align: center;'>"."&Delta;"."<span></div>",
+                'headerOptions' =>function ($model, $key, $index, $column){ return ['style' => 'text-align: center']; },
+ 
+                'encodeLabel' => false,
+                'contentOptions' =>function ($model, $key, $index, $column){ return ['style' => 'text-align:  center;']; },
                 'content' => function($data){
                     if (!(is_null($data['C_mdata']) || is_null($data['A_mdata']))){
                         $res = $data['A_mdata'] - $data['C_mdata'];

@@ -58,5 +58,6 @@ return [
 		'WORKORDERRECL'=>'Мастер: Рекламация',
 		'WORKORDERACCEPT'=>'Мастер: Наряд закрыт',
 		'JOBDONE'=>'Исполнитель: работа выполнена '
-	]
+	],
+	'MeterAccauntingPeriodDayOfMonth' => 10,
 ];

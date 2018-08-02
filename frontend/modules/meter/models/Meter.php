@@ -61,7 +61,8 @@ class Meter extends Model
 	// Получить последние показания по счетчику по счетчику
 	public function GetLastReading($mid)
 	{
-		$dateperiod = 10;	// дата начала расчетного периода каждого месяца
+		if (empty(Yii::$app->params['MeterAccauntingPeriodDayOfMonth'])) $dateperiod = 10;		// дата начала расчетного периода каждого месяца 
+		else $dateperiod = Yii::$app->params['MeterAccauntingPeriodDayOfMonth'];
 		$sqltext=  "SELECT ppp.mdatameter_id, ppp.mdatatime, ppp.mdata, ppp.mdatafile, (SELECT concat(e.lastname,' ',e.firstname,' ',e.patronymic) FROM employee e, powermeterdata pm  WHERE pm.mdatawho=e.id AND  pm.id = gg.id ) mwho, ppp.mdatafile, ppp.mdatameterstate, ppp.mdatacomment, ppp.id rec_id, ppp.mdatadeltime, ppp.mdatacode
 					FROM powermeterdata ppp,
 					  (SELECT MAX(pp.id) id 
@@ -137,7 +138,8 @@ class Meter extends Model
 	{
 		$oprights = Tickets::getUserOpRights();
 		if( !empty($oprights) && !empty($this->MeterId) ) {
-			$dateperiod = 10;
+			if (empty(Yii::$app->params['MeterAccauntingPeriodDayOfMonth'])) $dateperiod = 10;		// дата начала расчетного периода каждого месяца 
+			else $dateperiod = Yii::$app->params['MeterAccauntingPeriodDayOfMonth'];
 			$TS = Yii::$app->formatter->asDatetime( mktime(0, 0, 0, date("m"), $dateperiod, date("Y")) ,'yyyy-MM-dd H:i:s');
 			if (date("d") < $dateperiod)
 				$TS = Yii::$app->formatter->asDatetime( strtotime( $TS." -1 month" ) ,'yyyy-MM-dd H:i:s');

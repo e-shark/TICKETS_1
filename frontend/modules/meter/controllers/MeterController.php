@@ -2,6 +2,7 @@
 namespace frontend\modules\meter\controllers;
 
 use yii;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\web\UploadedFile;
@@ -75,7 +76,7 @@ class MeterController extends Controller
         if (empty($RefUrl))
             return $this->redirect(['meter-info','#'=>'meterdata','MeterId'=>$MeterId]);//$this->redirect(['view','id'=>$id]);
         else
-            return $this->redirect($RefUrl);
+            return $this->redirect(urldecode($RefUrl));
     }
 
     // Удаляет запись показаний
@@ -89,13 +90,15 @@ class MeterController extends Controller
     }
 
     // Удаляет все текущие показания (все показания с 10 по текущее число)
-    public function actionDeleteAllCurrent( $MeterId=0 )  
+    public function actionDeleteAllCurrent( $MeterId=0, $firstref = null )  
     {
         if ( !empty($MeterId) ) {
             $meter = new Meter($MeterId);
             $meter->DeleteAllCurrentReading($MeterId);
         }
-        return $this->redirect(Yii::$app->request->referrer);
+        return $this->redirect(Yii::$app->request->referrer.(empty($firstref)?"":"&firstref=".$firstref));
+        //return $this->redirect([Yii::$app->request->referrer]);
+        
     }
 
     // Получить фотографию показаний
@@ -112,14 +115,21 @@ class MeterController extends Controller
     }
 
     // Форма ввода показаний по счетчику
-    public function actionEnterReading( $MeterId=0 )  
+    public function actionEnterReading( $MeterId=0, $firstref = null )  
     {
         if (!empty($MeterId)) {
             $meter = new Meter($MeterId);
             $passport = $meter->GetMeterPassport($MeterId);
             $LastReading = $meter->GetLastReading($MeterId);
+            if (empty($firstref)) {
+                if (empty(Yii::$app->request->referrer))
+                    $firstref = Url::toRoute(['meter/fitter-meters-list']);
+                else
+                    $firstref = Yii::$app->request->referrer;
+                $firstref = urlencode($firstref);
+            }
 //Yii::warning("************************************************LastReading***********************[\n".json_encode($LastReading)."\n]");            
-            return $this->render( 'MeterEnterData', [ 'model' => $meter, 'passport'=>$passport, 'LastReading'=>$LastReading ,'refurl'=>(Yii::$app->request->referrer ?: Yii::$app->homeUrl) ]);
+            return $this->render( 'MeterEnterData', [ 'model' => $meter, 'passport'=>$passport, 'LastReading'=>$LastReading , 'firstref'=>$firstref]);
         } else 
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
     }
