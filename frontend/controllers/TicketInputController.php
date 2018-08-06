@@ -171,6 +171,7 @@ class TicketInputController extends Controller
                 $Ticket->tifacilitycode = $Ticket->getFacilityCod($data['tiFacility']);
                 $Ticket->tiregion = $Ticket->getRegionName($data['tiRegion']);
                 $Ticket->tiaddress = $Ticket->getAdressStr($data['tiStreet'] ,$data['tiFacility'] ,$data['tiObject'] ,$data['tiElevator'] ,$data['tiEntrance'] , $data['tiApartment']);
+Yii::warning("************************************************getAdressStr***********************[\n".json_encode($data)."\n]");            
 
                 $Ticket->fillOriginator(Yii::$app->user->id);
                 //$Ticket->tioriginator = $Ticket->getOriginatorName();

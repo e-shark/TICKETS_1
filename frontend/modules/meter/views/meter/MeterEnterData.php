@@ -53,13 +53,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?php //Кнопка "Удалить все показания текущего периода" ?>
         <div class="col-md-1"> 
-            <button class="btn btn-outline-primary btn-lg">
-                <?php echo Html::a(
-                    '<i class="glyphicon glyphicon-remove" style="color: red;"></i>',
-                    Url::to(['delete-all-current', 'MeterId'=>$LastReading['mdatameter_id'],'ReadingId' => $LastReading['rec_id'], 'firstref'=>$firstref]),
-                    ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?')]
-                ); ?>
-            </button>
+            <?php echo Html::a(
+                '<i class="glyphicon glyphicon-remove" style="color: red;"></i>',
+                Url::to(['delete-all-current', 'MeterId'=>$LastReading['mdatameter_id'],'ReadingId' => $LastReading['rec_id'], 'firstref'=>$firstref]),
+                ['data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),'class'=>"btn btn-outline-primary btn-lg"]
+            ); ?>
          </div>
 
     <?php } ?>

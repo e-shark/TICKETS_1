@@ -106,7 +106,8 @@ class TicketInputForm extends Model
    		$cnt = count($Sel);
    		if ($cnt > 0){
    			if (1 == $cnt){
-   				$input = Html::input('text','tiEntrance',$Sel[0]['id'],['id'=>'tiEntranceInput','class'=>'form-control' ,'disabled'=>'true' ]);
+   				//$input = Html::input('text','tiEntrance',$Sel[0]['id'],['id'=>'tiEntranceInput','class'=>'form-control', 'disabled'=>'true' ]);
+   				$input = Html::hiddenInput('tiEntrance', $Sel[0]['id'],['id'=>'tiEntranceInput']).Html::input('text','tiEntrance_ex',$Sel[0]['id'],['id'=>'tiEntranceInput_ex','class'=>'form-control', 'disabled'=>'true' ]);
    			} else{
 				$input =Html::dropDownList('tiEntrance', 'null', ArrayHelper::map($Sel,'id','text'),['id'=>'tiEntranceInput','class'=>'form-control','onChange'=>'onSelectEntrance()']) ;
    			}

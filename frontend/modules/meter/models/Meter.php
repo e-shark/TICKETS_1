@@ -11,7 +11,7 @@ use frontend\models\Tickets;
 
 class Meter extends Model
 {
-    const READINGSPATH  = 'appdata'.DIRECTORY_SEPARATOR.'MeterDialPhoto';		// Директория (относительно приложения), куда  будут складываться фотографии показаний счетчика
+    const READINGSPATH  = 'appdatastore'.DIRECTORY_SEPARATOR.'MeterDialPhoto';		// Директория (относительно приложения), куда  будут складываться фотографии показаний счетчика
     const CalibrationOBIS = 'C.2.5';										// ОБИС код параметра "дата кпоследней поверки" (калибровки)
 
     public $imageFile;
