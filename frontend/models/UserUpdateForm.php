@@ -13,6 +13,7 @@ class UserUpdateForm extends Model
     public $username;
     public $email;
     public $password;
+    public $firstref;
 
 
     /**
@@ -34,6 +35,8 @@ class UserUpdateForm extends Model
 
             //['password', 'required'],
             ['password', 'string', 'min' => 6],
+
+            ['firstref', 'string'],
         ];
     }
 
@@ -67,10 +70,11 @@ class UserUpdateForm extends Model
 
     public function loaduser($UserID)
     {
-        $user = new User();
-        $user=User::findIdentity($UserID);
+        //$user = new User();
+        $user = User::findIdentity($UserID);
         $this->username = $user->username;
         $this->email = $user->email;
+        return $user;
     }
 
 }

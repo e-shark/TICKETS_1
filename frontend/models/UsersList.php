@@ -37,9 +37,9 @@ class UsersList extends Model
 			if (!empty($ofltr))
 				$filtersql .= " and (false ".$ofltr.")";
 
-		Yii::warning("***********************************oprights*********************************************[\n".$model->oprights."\n]");
-		Yii::warning("************************************************litters***********************[\n".json_encode($litters)."\n]");
-		Yii::warning("***********************************filtersql*********************************************[\n".$filtersql."\n]");
+		//Yii::warning("***********************************oprights*********************************************[\n".$model->oprights."\n]");
+		//Yii::warning("************************************************litters***********************[\n".json_encode($litters)."\n]");
+		//Yii::warning("***********************************filtersql*********************************************[\n".$filtersql."\n]");
 
 			//$filtersql	.=" and oprights like BINARY '%".$model->oprights."%'";
 		}
@@ -53,9 +53,9 @@ class UsersList extends Model
 			if (!empty($ofltr))
 				$filtersql .= " and (false ".$ofltr.")";
 
-		Yii::warning("***********************************oprights*********************************************[\n".$model->oprights."\n]");
-		Yii::warning("************************************************litters***********************[\n".json_encode($litters)."\n]");
-		Yii::warning("***********************************filtersql*********************************************[\n".$filtersql."\n]");
+		//Yii::warning("***********************************oprights*********************************************[\n".$model->oprights."\n]");
+		//Yii::warning("************************************************litters***********************[\n".json_encode($litters)."\n]");
+		//Yii::warning("***********************************filtersql*********************************************[\n".$filtersql."\n]");
 
 		}
 

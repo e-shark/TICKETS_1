@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use Yii;
+use yii\helpers\Url;
 use yii\web\Controller;
 use frontend\models\UsersList;
 use frontend\models\SignupForm;
@@ -31,13 +32,27 @@ class UsersController extends Controller
 	public function actionEditUser($UserID)
 	{
         $model = new UserUpdateForm();
-        $model->loaduser($UserID);
-        if ($model->load(Yii::$app->request->post())) {
-            if ($user = $model->update($UserID)) {
-           		return $this->redirect(['index']);
-            }
-		}   
-        return $this->render('EditUser', [ 'model' => $model ]);
+
+		// Запоминаем, откуда пришли, чтобы можно было потом вернуться с сохранение фильтров        
+        if (empty($model->firstref)) {
+            if (empty(Yii::$app->request->referrer))
+                $model->firstref = urlencode( Url::toRoute(['users/index']) );
+            else
+                $model->firstref = urlencode( Yii::$app->request->referrer );
+        }
+
+        // подгружаем данные по юзеру и введенные поля, и все это пытаемся валидировать и сохранить
+        if ( !empty($model->loaduser($UserID)) ){
+	        if ($model->load(Yii::$app->request->post())) {
+	            if ($user = $model->update($UserID)) {
+	           		return $this->redirect(urldecode($model->firstref));
+	            }
+			}   
+
+			// прорисовываем форму, если сохранения небыло
+	        return $this->render('EditUser', [ 'model' => $model ]);
+    	}else 
+    		return $this->redirect( urldecode($model->firstref) );
 	}
 
 	public function actionDeleteUser($UserID)

@@ -58,6 +58,8 @@ return[
 'Edit user' => 'Редактировать пользователя',
 'Enter user' => 'Ввод пользователя',
 'Oprights' => 'Права',
+'Back' => 'Вернуться',
+'Delete user' => 'Удалить пользователя',
 
 'If you forgot your password you can '=>'Если вы забыли пароль, вы можете ',
 'If you have business inquiries or other questions, please fill out the following form to contact us. Thank you.'=>'Предложения и замечания к программе просьба отправлять заполнив форму обратной связи. Спасибо.',
