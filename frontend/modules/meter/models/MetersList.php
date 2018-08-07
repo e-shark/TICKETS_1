@@ -21,6 +21,7 @@ class MetersList extends Model
 
 	public static function FillFilterParams( &$model, $params)
 	{
+		$filtersql = "";
 		//---Preparу sql  statement for serial
 		if( array_key_exists('serial',$model->attributes ) ) {
 			if (!empty($params['serial'])) {

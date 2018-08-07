@@ -1,6 +1,7 @@
 <?php
 namespace frontend\models;
 
+use yii;
 use yii\base\Model;
 use common\models\User;
 
@@ -36,6 +37,15 @@ class SignupForm extends Model
         ];
     }
 
+    public function attributeLabels()
+    {
+        return [
+            'username'=>Yii::t('app','Username'),
+            'password'=>Yii::t('app','Password'),
+            'rememberMe'=>Yii::t('app','Remember Me')
+        ];
+    }
+
     /**
      * Signs user up.
      *
@@ -55,4 +65,13 @@ class SignupForm extends Model
         
         return $user->save() ? $user : null;
     }
+
+    public function loaduser($UserID)
+    {
+        $user = new User();
+        $user=User::findIdentity($UserID);
+        $this->username = $user->username;
+        $this->email = $user->email;
+    }
+
 }

@@ -49,8 +49,20 @@ return[
 'Verification Code'=>'Проверочный код',
 'Meters' => 'Счетчики',
 
+'Users list' => 'Список пользователей',
+'Full name' => 'Ф.И.О.',
+'opright' => 'права',
+'Created' => 'Создан',
+'Updated' => 'Изменен',
+'Add user' => 'Добавить пользователя',
+'Edit user' => 'Редактировать пользователя',
+'Enter user' => 'Ввод пользователя',
+'Oprights' => 'Права',
+
 'If you forgot your password you can '=>'Если вы забыли пароль, вы можете ',
 'If you have business inquiries or other questions, please fill out the following form to contact us. Thank you.'=>'Предложения и замечания к программе просьба отправлять заполнив форму обратной связи. Спасибо.',
 'Please fill out your email. A link to reset password will be sent there.'=>'Пожалуйста укажите  адрес своей электронной почты, по которому Вам будет направлена ссылка для сброса пароля.',
 'Please fill out the following fields to login:'=>'Пожалуйста заполните следующие поля для входа в систему:',
+'Please fill out the following fields to enter new user:' => 'Пожалуйста заполните следующие поля чтобы добавить пользователя:',
+'Please, you can edit following fields:' =>'Вы можете отредактировать следующие поля:',
 ];

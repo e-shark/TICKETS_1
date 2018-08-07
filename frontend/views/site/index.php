@@ -31,7 +31,7 @@ $this->title = 'ОЗК ОДС КСП "Харьковгорлифт"';
         <p><a class="btn btn-lg btn-success" href="index.php?r=meter/meter/index"><?=YII::t('app','Meters')?></a></p>
         <p><a class="btn btn-lg btn-success" href="index.php?r=meter/meter/fitter-meters-list"><?=YII::t('app','Meters')." механика"?></a></p>
             <?php }?>
-            
+        <p><a class="btn btn-lg btn-success" href="index.php?r=users/index"><?=YII::t('app','Users list')?></a></p>
 
         <?php }?>
     </div>
