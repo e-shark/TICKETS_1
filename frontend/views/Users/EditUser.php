@@ -15,7 +15,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-lg-5">
             <?php $form = ActiveForm::begin(['id' => 'form-edituser']); ?>
-                <?= $form->field($model, 'firstref')->hiddenInput() ?>
+                <?php //echo $form->field($model, 'firstref')->hiddenInput() ?>
+                <?=  Html::hiddenInput('firstref', $model->firstref); ?>
+
 
                 <?= $form->field($model, 'username')->textInput(['readonly' => true]) ?>
 
@@ -43,6 +45,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php 
     // кнопка "Вернуться"
-    if (empty($model->firstref)) echo Html::a(Yii::t('app','Back'), Url::toRoute(['users/index1']), ['class'=>'btn btn-primary']);
+    if (empty($model->firstref)) echo Html::a(Yii::t('app','Back'), Url::toRoute(['users/index']), ['class'=>'btn btn-primary']);
     else echo Html::a(Yii::t('app','Back'), urldecode($model->firstref), ['class'=>'btn btn-primary']);
 ?>

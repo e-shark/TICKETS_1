@@ -36,7 +36,6 @@ class UserUpdateForm extends Model
             //['password', 'required'],
             ['password', 'string', 'min' => 6],
 
-            ['firstref', 'string'],
         ];
     }
 

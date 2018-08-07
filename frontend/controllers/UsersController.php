@@ -33,13 +33,15 @@ class UsersController extends Controller
 	{
         $model = new UserUpdateForm();
 
-		// Запоминаем, откуда пришли, чтобы можно было потом вернуться с сохранение фильтров        
-        if (empty($model->firstref)) {
+		// Запоминаем, откуда пришли, чтобы можно было потом вернуться с сохранение фильтров    
+        if (empty(Yii::$app->request->post()['firstref'])) {
             if (empty(Yii::$app->request->referrer))
                 $model->firstref = urlencode( Url::toRoute(['users/index']) );
             else
                 $model->firstref = urlencode( Yii::$app->request->referrer );
-        }
+        }else  $model->firstref = Yii::$app->request->post()['firstref']; 
+
+//Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
 
         // подгружаем данные по юзеру и введенные поля, и все это пытаемся валидировать и сохранить
         if ( !empty($model->loaduser($UserID)) ){
