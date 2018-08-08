@@ -76,5 +76,9 @@ return [
             'class' => 'frontend\modules\meter\MeterModule',
             // ... другие настройки модуля ...
         ],
+        'employeeeq' => [
+            'class' => 'frontend\modules\employeeeq\Module',
+        ],
+        
     ],
 ];

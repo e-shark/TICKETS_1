@@ -29,12 +29,20 @@ use conquer\select2\Select2Widget;
 
       //--- права мультиселектом
       if( array_key_exists('oprights',$model->attributes ) ) {
-        echo '<div class="form-group col-xs-2" id="mfAddr"> '.Yii::t('app','Oprights').":";
+        echo '<div class="form-group col-xs-3" id="mfAddr"> '.Yii::t('app','Oprights').":";
           echo   Select2Widget::widget([
             'id' => 'oprights',
             'name' => 'oprights',
             'settings' => [ 'width' => '100%', 'val' => "611" ],                 
-            'items' => ["m"=>"(m) op1", "M"=>"(M) Мастер", "d"=>"(d) диспетчер", "D"=>"(D) op4"],
+            'items' => [
+                "a" => "(a) Администратор",
+                "m" => "(m) Мастер", 
+                "M" => "(M) Старший мастер", 
+                "d" => "(d) Оператор", 
+                "D" => "(D) Диспетчер",
+                "F" => "(F) Электромеханик",
+                "T" => "(T) технолог ПТО",
+            ],
             'value' => $model->oprights,
     		'multiple' => true,            
 
