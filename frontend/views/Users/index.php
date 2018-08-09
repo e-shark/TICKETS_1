@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				'attribute' => 'fullname',
 			],
 			[
-				'label' => Yii::t('app','opright'),
+				'label' => Yii::t('app','Oprights'),
 				'content' => function($data){ return $data['oprights']; },
 			],
 			[

@@ -21,12 +21,14 @@ use conquer\select2\Select2Widget;
         Html::textinput('email', $model->email,['class'=>'form-control']).'</div>';
       }
 
+      /*
       //--- права строкой
       if( array_key_exists('oprightsstr',$model->attributes ) ) {
         echo '<div class="form-group col-xs-1" id="mfAddr"> '.Yii::t('app','Oprights').":".
         Html::textinput('oprightsstr', $model->oprightsstr,['class'=>'form-control']).'</div>';
       }
-
+      */
+      
       //--- права мультиселектом
       if( array_key_exists('oprights',$model->attributes ) ) {
         echo '<div class="form-group col-xs-3" id="mfAddr"> '.Yii::t('app','Oprights').":";
