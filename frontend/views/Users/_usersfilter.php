@@ -41,7 +41,7 @@ use conquer\select2\Select2Widget;
                 "d" => "(d) Оператор", 
                 "D" => "(D) Диспетчер",
                 "F" => "(F) Электромеханик",
-                "T" => "(T) технолог ПТО",
+                "T" => "(T) Технолог ПТО",
             ],
             'value' => $model->oprights,
     		'multiple' => true,            

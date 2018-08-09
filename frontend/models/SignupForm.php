@@ -13,6 +13,7 @@ class SignupForm extends Model
     public $username;
     public $email;
     public $password;
+    public $password_repeat;
 
 
     /**
@@ -34,15 +35,21 @@ class SignupForm extends Model
 
             ['password', 'required'],
             ['password', 'string', 'min' => 6],
+            ['password', 'required'],
+            ['password', 'compare'],
+
+            ['password_repeat', 'string', 'min' => 6],
+
         ];
     }
 
     public function attributeLabels()
     {
         return [
-            'username'=>Yii::t('app','Username'),
-            'password'=>Yii::t('app','Password'),
-            'rememberMe'=>Yii::t('app','Remember Me')
+            'username' => 'Имя пользователя', //'Имя пользователя'
+            'password' => 'Пароль',//Yii::t('app','Password'),
+            'password_repeat' => 'Подтверждение пароля',//=> Yii::t('app','Password confirm'),
+            'rememberMe' => 'запомнить меня',//Yii::t('app','Remember Me'),
         ];
     }
 

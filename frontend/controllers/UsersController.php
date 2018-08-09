@@ -40,21 +40,26 @@ class UsersController extends Controller
             else
                 $model->firstref = urlencode( Yii::$app->request->referrer );
         }else  $model->firstref = Yii::$app->request->post()['firstref']; 
-
 //Yii::warning("************************************************model***********************[\n".json_encode($model)."\n]");
+
 
         // подгружаем данные по юзеру и введенные поля, и все это пытаемся валидировать и сохранить
         if ( !empty($model->loaduser($UserID)) ){
 	        if ($model->load(Yii::$app->request->post())) {
 	            if ($user = $model->update($UserID)) {
-	           		return $this->redirect(urldecode($model->firstref));
+//Yii::warning("************************************************firstref***********************[\n".urldecode($model->firstref)."\n]");
+					//return "! ERROR !";
+	           		return $this->redirect( urldecode($model->firstref) );
+	           		//return $this->redirect( "http://lift/index.php?r=users%2Findex&username=&email=&oprightsstr=&sort=username");
+//Yii::warning("************************************************---------------***********************[\n".urldecode($model->firstref)."\n]");
 	            }
 			}   
 
 			// прорисовываем форму, если сохранения небыло
 	        return $this->render('EditUser', [ 'model' => $model ]);
-    	}else 
+    	}else {
     		return $this->redirect( urldecode($model->firstref) );
+    	}
 	}
 
 	public function actionDeleteUser($UserID)

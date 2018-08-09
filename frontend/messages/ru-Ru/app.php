@@ -60,6 +60,7 @@ return[
 'Oprights' => 'Права',
 'Back' => 'Вернуться',
 'Delete user' => 'Удалить пользователя',
+'Password confirm' => 'Подтверждение пароля',
 
 'If you forgot your password you can '=>'Если вы забыли пароль, вы можете ',
 'If you have business inquiries or other questions, please fill out the following form to contact us. Thank you.'=>'Предложения и замечания к программе просьба отправлять заполнив форму обратной связи. Спасибо.',

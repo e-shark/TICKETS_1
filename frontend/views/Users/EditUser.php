@@ -15,15 +15,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-lg-5">
             <?php $form = ActiveForm::begin(['id' => 'form-edituser']); ?>
-                <?php //echo $form->field($model, 'firstref')->hiddenInput() ?>
-                <?=  Html::hiddenInput('firstref', $model->firstref); ?>
-
-
+                <?= Html::hiddenInput('firstref', $model->firstref); ?>
                 <?= $form->field($model, 'username')->textInput(['readonly' => true]) ?>
-
                 <?= $form->field($model, 'email')->textInput(['autofocus' => true]) ?>
-
                 <?= $form->field($model, 'password')->passwordInput() ?>
+                <?= $form->field($model, 'password_repeat')->passwordInput() ?>
 
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('app','Save'), ['class' => 'btn btn-primary', 'name' => 'save-button']) ?>
