@@ -169,6 +169,24 @@ class Report_Titotals extends Model
 				break;
 			}
 		}
+		//---Preparу sql statement for tiopstatus filter
+		if(array_key_exists('opstatus',$model->attributes )){
+			$model->opstatus = empty($params['opstatus']) ?  '' : $params['opstatus'];
+			if(!empty($model->opstatus))	switch($model->opstatus){
+				case 1:	// остановлен
+					$filtersql	 .=" and (tiopstatus = 0) ";
+				break;
+				case 2:	// не определено
+					$filtersql	 .=" and (tiopstatus is null) ";
+				break;
+				case 3:	// восстановлен
+					$filtersql	 .=" and ((tiopstatus = 1) and (tioosbegin is not null)) ";
+				break;
+				case 4:	// отремонтирован без останова
+					$filtersql	 .=" and ((tiopstatus = 1) and (tioosbegin is null)) ";
+				break;
+			}
+		}
 		//---Fill model->reportpagesize
 		if(array_key_exists('reportpagesize',$model->attributes )){
 			$model->reportpagesize = (!isset($params['reportpagesize'])) ?  20 : intval($params['reportpagesize']);

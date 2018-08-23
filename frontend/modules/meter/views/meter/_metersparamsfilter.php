@@ -25,7 +25,7 @@ $oprights=Tickets::getUserOpRights();
           $fitters = TicketInputForm::getFittersWithSBList();
           //$fitters = [["text"=>'Все','id'=>0]]+$fitters;
           array_unshift($fitters,["text"=>'Все','id'=>0]);
-          echo '<div class="form-group col-xs-3"> Механик :';
+          echo '<div class="form-group col-xs-3"> Электромонтер :';
           echo   Select2Widget::widget([
             'id' => 'fitter',
             'name' => 'fitter',

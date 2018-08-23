@@ -104,6 +104,11 @@ use frontend\models\Report_Titotals;
         echo '<div class="form-group col-xs-2" id="divtivexecutant"> Исполнитель:'.
         Html::textinput('tiexecutant', $model->tiexecutant,['class'=>'form-control']).'</div>';
       }
+      //---opstatus 
+      if( array_key_exists('opstatus',$model->attributes ) ) {
+        echo '<div class="form-group col-xs-2" id="opstatus"> Статус:'.
+        Html::dropDownList('opstatus',$model->opstatus,[0=>'Все',1=>'Остановлен',2=>'Неизвестен',3=>'восстановлен'/*,4=>'без останова'*/],['class'=>'form-control']).'</div>';
+      }
       //---Report page size
       if( array_key_exists('reportpagesize',$model->attributes ) ) {
         echo '<div class="form-group col-xs-2" id="reportpagesize"> Строк:'.

@@ -46,7 +46,7 @@ use conquer\select2\Select2Widget;
                 "T" => "(T) Технолог ПТО",
             ],
             'value' => $model->oprights,
-    		'multiple' => true,            
+            'multiple' => true,            
 
           ]);           
           echo '</div>';

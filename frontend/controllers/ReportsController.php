@@ -17,6 +17,7 @@ use frontend\models\Report_StoppedSum;
 use frontend\models\Report_StoppedCount;
 use frontend\models\Report_ElevatorsList;
 use frontend\models\Report_Summary1562;
+use frontend\models\Report_RepairsList;
 
 class ReportsController extends Controller
 {
@@ -112,5 +113,13 @@ class ReportsController extends Controller
         $model = new Report_Summary1562();
         $model->generate(Yii::$app->request->queryParams);
         return $this->render( 'summary1562',['model'=>$model] );
+    }
+
+    public function actionRepairsList()
+    {
+        $model = new Report_RepairsList();
+        $report = $model->generateReport(Yii::$app->request->queryParams);
+        $provider = $model->generateList(Yii::$app->request->queryParams);
+        return $this->render( 'repairslist',['provider'=>$provider, 'model'=>$model] );
     }
 }
