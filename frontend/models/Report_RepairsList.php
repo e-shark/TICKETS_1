@@ -54,7 +54,7 @@ class Report_RepairsList extends Model
 		$filtersql	.=" and (tioosbegin is not null) ";						// нас интересуют только лифты в останове
 		if (!empty($model->dateto)) {
 			$oosend  = $model->dateto;
-			$filtersql	.= " and (tioosbegin < '$model->datefrom') ";		// не рассматриваем лифты, остановленные после интересующего периода
+			$filtersql	.= " and (tioosbegin <= '$model->datefrom') ";		// не рассматриваем лифты, остановленные после интересующего периода
 		}
 		else $oosend = date('d-M-y');
 		if (!empty($model->datefrom)) {
@@ -85,9 +85,8 @@ class Report_RepairsList extends Model
 	//--------------------------------------------------------------------------------------
 	function CalcIntervalsSum($iedgs)
 	{
-Yii::warning("************************************************intervals***********************[\n".json_encode($iedgs)."\n]");
 		ksort($iedgs);
-Yii::warning("************************************************intervals sort***********************[\n".json_encode($iedgs)."\n]");
+Yii::warning("-------------------- intervals sort ------------------------[\n".json_encode($iedgs)."\n]");
 
 		// Складываем концы интервалов в интервалы
 		$intervals = [];
@@ -117,16 +116,26 @@ Yii::warning("\n----- suminterval ---------------------------------------\n".dat
 				catch(\Exception $e){ continue; }
 			}
 		}
-Yii::warning("\n----- SUM---------------------------------------\n sum=".$sum."    ".(int)($sum/60/60)."\n");
+Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(int)($sum/60/60)."\n");
 		return $sum;		
 	}
 
 	//--------------------------------------------------------------------------------------
 	//	Расчитать интервалы простоя, сложив прости в каждой заявке по лифту
 	//--------------------------------------------------------------------------------------
-	public function MakeReportTable($params,$DateFrom, $DateTo, $OpStatus, $District)
+	public function MakeReportTable($params, $DateFrom, $DateTo, $OpStatus, $District)
 	{
- 		$f1sql = self::FillParamsFilterWODistrict($this,$params);
+		$ReportTable = [];
+
+		try{ $iDateFrom = strtotime( $DateFrom ); } catch(\Exception $e){ 
+			return $ReportTable; 
+		}
+		try{ $iDateTo = strtotime( $DateTo ); } catch(\Exception $e){ 
+			return $ReportTable; 
+		}
+
+ 		//$f1sql = self::FillParamsFilterWODistrict($this,$params);
+ 		$f1sql = self::FillParamsFilter($this,$params);
 
 		$sqltext="SELECT ticket.id, ticket.tiaddress, ticket.tiobjectcode, tiequipment_id, ticode, tiregion, tiopenedtime, tioosbegin, tioosend, tiplannedtimenew,  oostypetext, tiproblemtypetext, tidescription, tiproblemtext, streetname, fabuildingno, elporchno, elporchpos, elinventoryno 
 		from ticket left join (
@@ -139,38 +148,21 @@ Yii::warning("\n----- SUM---------------------------------------\n sum=".$sum." 
  		left join oostype on ticket.tioostype_id=oostype.id
  		left join facility on ticket.tifacility_id =facility.id 
  		left join street on facility.fastreet_id =street.id
- 		where tioosbegin is not null $f1sql order by tiregion, tiequipment_id ";
+ 		where tiequipment_id is not null $f1sql order by tiregion, tiequipment_id, tioosbegin ";
 
 Yii::warning("\n---------------------------------SQL------------------\n".$sqltext.'\n');
 
 		$tickets = Yii::$app->db->createCommand($sqltext)->queryAll();	
-		$ReportTable = [];
 
 		$intervals = [];
 		$ReportTableRec['tiequipment_id'] = 0;
 		$start = true;
 		foreach($tickets as $ticket){
-			$tbegin = $ticket['tioosbegin'];
-			$tend = $ticket['tioosend'];
-			if (empty($tbegin) and empty($tend)) continue;
-			if (empty($tbegin)) $tbegin = $DateFrom;
-			if ($tbegin < $DateFrom) $tbegin = $DateFrom;
-			if (empty($tend)) $tend = $DateTo;
-			if ($tend > $DateTo) $tend = $DateTo;
-			try{ $ibegin = strtotime( $tbegin ); } catch(\Exception $e){ continue; }
-			try{ $iend = strtotime( $tend ); } catch(\Exception $e){ continue; }
-		Yii::warning("\n--- interval ---------------------------------------\n [".$ticket['tioosbegin']."]: ".$tbegin."  = ".$ibegin." \n [".$ticket['tioosend']."]: ".$tend."  = ".$iend."\n");
-			while( isset($intervals[$ibegin]) ) $ibegin++;
-			$intervals[$ibegin] = +1;
-			while( isset($intervals[$iend]) ) $iend++;
-			$intervals[$iend] =  -1;
-		Yii::warning("\n--- int ext ---------------------------------------\n [".$ticket['tioosbegin']."]: ".date('d-m-Y H:i:s',$ibegin)."  = ".$ibegin." \n [".$ticket['tioosend']."]: ".date('d-m-Y H:i:s',$iend)."  = ".$iend."\n  eq_id:".$ticket['tiequipment_id']."\n  eq_cod:".$ticket['tiobjectcode']."\n");
-
 			if ($ReportTableRec['tiequipment_id'] != $ticket['tiequipment_id']) {
 				// следующий лифт
 				if (!$start){
 					// Делаем расчет и сохраняем запись по предидущему лифту
-					Yii::warning("\n--- CALC ---------------------------------------\n eq_id:".$ticket['tiequipment_id']."\n  eq_cod:".$ticket['tiobjectcode']."\n");
+					Yii::warning("\n=== CALC ================================\n eq_id:".$ReportTableRec['tiequipment_id']."\n eq_cod:".$ReportTableRec['tiobjectcode']."\n");
 					$sumtime = self::CalcIntervalsSum( $intervals );
 					$ReportTableRec['oosumtime'] = (int)($sumtime/60/60);
 					$ReportTable[] = $ReportTableRec;
@@ -182,17 +174,37 @@ Yii::warning("\n---------------------------------SQL------------------\n".$sqlte
 					'tiobjectcode' => $ticket['tiobjectcode'],
 					'tiaddress' => $ticket['tiaddress'],
 					'tiregion' => $ticket['tiregion'],
+					'tioosbegin' => $ticket['tioosbegin'],
+					'tickets' => [],
 					'oosumtime' => 0,
 					//'' => $ticket[''],
 				];
 				$start = false;
 			}
+			$ReportTableRec['tickets'] [] = $ticket['id'];
+			$tbegin = $ticket['tioosbegin'];
+			$tend = $ticket['tioosend'];
+			if (empty($tbegin) and empty($tend)) continue;
+			if (empty($tbegin)) $tbegin = $DateFrom;
+			if (empty($tend)) $tend = $DateTo;
+			try{ $ibegin = strtotime( $tbegin ); } catch(\Exception $e){ continue; }
+			try{ $iend = strtotime( $tend ); } catch(\Exception $e){ continue; }
+			if ($ibegin < $iDateFrom) $ibegin = $iDateFrom;
+			if ($iend > $iDateTo) $iend = $iDateTo;
+		//Yii::warning("\n--- interval ---------------------------------------\n [".$ticket['tioosbegin']."]: ".$tbegin."  = ".$ibegin." \n [".$ticket['tioosend']."]: ".$tend."  = ".$iend."\n");
+			while( isset($intervals[$ibegin]) ) $ibegin++;
+			$intervals[$ibegin] = +1;
+			while( isset($intervals[$iend]) ) $iend++;
+			$intervals[$iend] =  -1;
+	Yii::warning("\n--- int ext ---------------------------------------\n [".$ticket['tioosbegin']."]: ".date('d-m-Y H:i:s',$ibegin)."  = ".$ibegin." \n [".$ticket['tioosend']."]: ".date('d-m-Y H:i:s',$iend)."  = ".$iend."\n  eq_id:".$ticket['tiequipment_id']."\n  eq_cod:".$ticket['tiobjectcode']."\n");
 
-		}
+		}	// foreach
+
 		if (!$start){
 			// Делаем расчет и сохраняем последнюю запись
+			Yii::warning("\n=== CALC END ============================\n eq_id:".$ReportTableRec['tiequipment_id']."\n eq_cod:".$ReportTableRec['tiobjectcode']."\n");
 			$sumtime = self::CalcIntervalsSum( $intervals );
-			$ReportTableRec['oosumtime'] = $sumtime;
+			$ReportTableRec['oosumtime'] = (int)($sumtime/60/60);
 			$ReportTable[] = $ReportTableRec;
 		}
 		
@@ -208,6 +220,60 @@ Yii::warning("\n---------------------------------SQL------------------\n".$sqlte
 //Yii::warning("\n----- sum ---------------------------------------\n".$sum."\n");
 	}
 
+//--------------------------------------------------------------------------------------
+//	Получить параметры лифтов, которые есть в отчете
+//--------------------------------------------------------------------------------------
+	function GetElevatorsParams($ReportTable)
+	{
+		$ellist = "(";
+		$first = true;
+		foreach($ReportTable as $rec)
+		{
+			if ($first) 
+				$first = false;
+			else 
+				$ellist .= ",";
+			if (!empty($rec['tiequipment_id'])) $ellist .= $rec['tiequipment_id'];
+			else $ellist .= 0;
+		}
+		$ellist .= ")";
+		$sql = "SELECT * from (
+SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.st) worknum
+   FROM (SELECT CONCAT (e.elfacility_id, e.elporchno) sid, s.tiopstatus st, e.* FROM elevator e  INNER JOIN 
+       (SELECT t.tiequipment_id, t.tiopstatus, MAX(t.tistatustime) lasttime, t.tifacility_id
+           FROM ticket t WHERE t.tiequipment_id IN (SELECT id FROM elevator WHERE eldevicetype = 1)
+                GROUP BY t.tiequipment_id) s ON e.id = s.tiequipment_id) a GROUP BY a.sid) e2 INNER JOIN
+                 (SELECT CONCAT (e.elfacility_id, e.elporchno) sid, s.lasttime, s.tiopstatus st, e.*
+                    FROM elevator e INNER JOIN (SELECT t.tiequipment_id, t.tiopstatus,
+             MAX(t.tistatustime) lasttime, t.tifacility_id 
+             FROM ticket t WHERE t.tiequipment_id IN (SELECT id FROM elevator WHERE eldevicetype = 1)
+             GROUP BY t.tiequipment_id) s ON e.id = s.tiequipment_id) p ON  p.sid = e2.sid
+        ) x where x.id in ".$ellist." ;";
+//Yii::warning("\n=== ellist ============================\n ellist: ".$ellist."\n sql: ".$sql);
+		$elparams = Yii::$app->db->createCommand($sql)->queryAll();	
+		
+		return $elparams;
+	}
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+	function AddElPArams(&$ReportTable, $ElParams)
+	{
+		foreach($ReportTable as &$rec){
+			$elevator = NULL;
+			foreach($ElParams as $elrec){
+				if ($elrec['id'] == $rec['tiequipment_id'])
+					$elevator = $elrec;
+			}
+			if (!empty($elevator)) {
+				$rec['ep_status'] = $elevator['st'];
+				$rec['ep_statustime'] = $elevator['lasttime'];
+				$rec['ep_elnum'] = $elevator['elnum'];
+				$rec['ep_worknum'] = $elevator['worknum'];
+			}
+			//$rec['ep_elnum'] = 10;
+		}
+	}
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------
 	public function generateListOld($params)
@@ -247,7 +313,9 @@ Yii::warning("\n---------------------------------SQL------------------\n".$sqlte
 //--------------------------------------------------------------------------------------
 	public function generateList($params)
 	{
-		$ReportTable = self::MakeReportTable($params,'2000-01-01', date('d-M-y'), NULL, NULL);
+		//$ReportTable = self::MakeReportTable($params,'2000-01-01', date('d-M-y'), NULL, NULL);
+		$ReportTable = self::MakeReportTable($params,'01-08-2018', '20-08-2018', NULL, NULL);
+		self::AddElPArams($ReportTable, self::GetElevatorsParams($ReportTable));
 		$provider = new ArrayDataProvider([
 			'allModels' => $ReportTable,
 			'key' => 'id',

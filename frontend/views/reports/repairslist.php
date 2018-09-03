@@ -58,24 +58,24 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
                 'format' => 'html',
                 'content'=> function($data){
                 	return "<b>".(new DateTime($data['tioosbegin'], new DateTimeZone("UTC")))->format('d-m-Y H:i:s')."</b> -&nbsp;остановка <br>".
+                    "";},
+                    /*
                 	(empty($data['tiplannedtimenew'])?"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;":(new DateTime($data['tiplannedtimenew'], new DateTimeZone("UTC")))->format('d-m-Y H:i:s'))." -&nbsp;план.пуска<br>".
                 	(empty($data['tioosend'])?"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;":(new DateTime($data['tioosend'], new DateTimeZone("UTC")))->format('d-m-Y H:i:s')).
                 	" -&nbsp;пуск";},
+                    */
             ],
             [
-                'label' =>"Причина",
+                'label' =>"Заявок",
                 //'attribute' => 'oostypetext',
                 'format' => 'html',
-                'content'=> function($data){return "<b>".$data['oostypetext']."</b> <br>".$data['tidescription']." <br>".$data['tiproblemtext'];},
+                'content'=> function($data){ return count($data['tickets']); },
             ],
             [
-                'label' =>"Номер заявки",
-                //'attribute' => 'ticode',
+                'label' =>"без транспорта",
                 'content' => function($data){ 
-                    $url = Url::toRoute(['tickets/view', 'id' => $data['id']]);
-                    return "<a href=$url>".$data['ticode'].'</a>';},
-                'format' => 'html'
-
+                    return empty($data['ep_elnum'])?"V":"";
+                }
             ],
         ];
 
