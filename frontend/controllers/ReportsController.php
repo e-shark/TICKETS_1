@@ -118,8 +118,9 @@ class ReportsController extends Controller
     public function actionRepairsList()
     {
         $model = new Report_RepairsList();
+        $model->FillParams(Yii::$app->request->queryParams);
         $report = $model->generateReport(Yii::$app->request->queryParams);
         $provider = $model->generateList(Yii::$app->request->queryParams);
-        return $this->render( 'repairslist',['provider'=>$provider, 'model'=>$model] );
+        return $this->render( 'repairslist',['provider'=>$provider, 'report'=>$report, 'model'=>$model] );
     }
 }

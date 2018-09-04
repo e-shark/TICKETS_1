@@ -14,14 +14,79 @@ class Report_RepairsList extends Model
 	public $dateto;
 	//public $tifindstr;
 	public $opstatus;
+	public $recperpage;
 
-    public static function FillParamsFilterWODistrict( &$model, $params)
+	public $ElParams;
+
+	//--------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------
+    public function FillParams($params)
     {
-    	$filtersql = "";
 		//---Preparу sql statement for opstatus filter
-		if(array_key_exists('opstatus',$model->attributes )){
-			$model->opstatus = empty($params['opstatus']) ?  '' : $params['opstatus'];
-			if(!empty($model->opstatus))	switch($model->opstatus){
+		if(array_key_exists('opstatus', $this->attributes )){
+			$this->opstatus = empty($params['opstatus']) ?  '' : $params['opstatus'];
+		}
+
+		//---Preparу sql  statement for datefrom
+		if( array_key_exists('datefrom', $this->attributes ) ) {
+			$this->datefrom   = ( !empty($params['datefrom'] ) ) ? $params['datefrom'] :
+				Yii::$app->db->createCommand("SELECT tiopenedtime FROM ticket ORDER BY tiopenedtime ASC LIMIT 1")->queryOne()['tiopenedtime'];
+			//$this->datefrom = $params['datefrom'];
+			try{ $dateiso = Yii::$app->formatter->asDate($this->datefrom,'yyyy-MM-dd'); }catch(\Exception $e){ $dateiso=null;}
+			$this->datefrom = $dateiso;
+		}
+
+		//---Preparу sql  statement for dateto
+		if( array_key_exists('dateto', $this->attributes ) ) {
+			$this->dateto   = empty($params['dateto']) ?  date('d-M-y') : $params['dateto'];
+			try{ $dateiso = Yii::$app->formatter->asDate($this->dateto,'yyyy-MM-dd'); }catch(\Exception $e){ $dateiso=date('d-M-y'); }
+			$this->dateto = $dateiso;
+			if($this->dateto < $this->datefrom) $this->dateto = $this->datefrom;
+		}
+
+		//---Preparу sql  statement for district
+		if( array_key_exists('district', $this->attributes ) ) if( !empty($params['district'] ) ) {
+			$this->district = $params['district'];
+		}
+
+		//---Preparу sql  statement for district
+		if( array_key_exists('recperpage', $this->attributes ) ) {
+			if( !empty($params['recperpage'] ) ) 
+				$this->recperpage = $params['recperpage'];
+			else
+				$this->recperpage = 20;
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------
+	function FillFilterDate()
+	{
+		$filtersql = "";
+
+		$filtersql	.=" and (tioosbegin is not null) ";						// нас интересуют только лифты в останове
+		if (!empty($this->dateto)) {
+			$oosend  = $this->dateto;
+			$filtersql	.= " and (tioosbegin < '$this->dateto') ";		// не рассматриваем лифты, остановленные после интересующего периода
+		}
+		else $oosend = date('d-M-y');
+		if (!empty($this->datefrom)) {
+			$oosbegin  = $this->datefrom;
+		}
+		else $oosbegin = '2000-01-01';							// если не задано другое, то в качестве начала интервала берём "когда-то-давныим-давно"
+		$filtersql	.=" and ((tioosend is null) or (tioosend > '$oosbegin')) ";	// нужны лифты не запущенные, или запущеные до конца интервала
+
+		return $filtersql;
+	}
+
+	//--------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------
+	function FillFilter()
+	{
+		$filtersql = "";
+
+		if(!empty($this->opstatus))	
+			switch($this->opstatus){
 				case 1:	// остановлен
 					$filtersql	 .=" and (elopstatus = 0) ";
 				break;
@@ -35,49 +100,14 @@ class Report_RepairsList extends Model
 					$filtersql	 .=" and ((elopstatus = 1) and (tioosbegin is null)) ";
 				break;
 			}
-		}
-		//---Preparу sql  statement for datefrom
-		if( array_key_exists('datefrom',$model->attributes ) ) {
-			$model->datefrom   = ( !empty($params['datefrom'] ) ) ? $params['datefrom'] :
-				Yii::$app->db->createCommand("SELECT tiopenedtime FROM ticket ORDER BY tiopenedtime ASC LIMIT 1")->queryOne()['tiopenedtime'];
-			//$model->datefrom = $params['datefrom'];
-			try{$dateiso=Yii::$app->formatter->asDate($model->datefrom,'yyyy-MM-dd');}catch(\Exception $e){ $dateiso=null;}
-			$model->datefrom = $dateiso;
-		}
-		//---Preparу sql  statement for dateto
-		if( array_key_exists('dateto',$model->attributes ) ) {
-			$model->dateto   = empty($params['dateto']) ?  date('d-M-y') : $params['dateto'];
-			try{$dateiso=Yii::$app->formatter->asDate($model->dateto,'yyyy-MM-dd');}catch(\Exception $e){ $dateiso=date('d-M-y'); }
-			$model->dateto = $dateiso;
-			if($model->dateto < $model->datefrom) $model->dateto = $model->datefrom;
-		}
-		$filtersql	.=" and (tioosbegin is not null) ";						// нас интересуют только лифты в останове
-		if (!empty($model->dateto)) {
-			$oosend  = $model->dateto;
-			$filtersql	.= " and (tioosbegin <= '$model->datefrom') ";		// не рассматриваем лифты, остановленные после интересующего периода
-		}
-		else $oosend = date('d-M-y');
-		if (!empty($model->datefrom)) {
-			$oosbegin  = $model->datefrom;
-		}
-		else $oosbegin = '2000-01-01';							// если не задано другое, то в качестве начала интервала берём "когда-то-давныим-давно"
-		$filtersql	.=" and ((tioosend is null) or (tioosend > '$oosbegin')) ";	// нужны лифты не запущенные, или запущеные до конца интервала
 
-		return $filtersql;
-	}
-
-	//--------------------------------------------------------------------------------------
-	//--------------------------------------------------------------------------------------
-	public function FillParamsFilter(&$model, $params)
-	{
-		$filtersql = self::FillParamsFilterWODistrict($model, $params);
-
-		//---Preparу sql  statement for district
-		if( array_key_exists('district',$model->attributes ) ) if( !empty($params['district'] ) ) {
-			$model->district = $params['district'];
-			$districtF=str_replace("'","\'",$model->district);
-			$filtersql	.=" and (tiregion like '$districtF') ";
+		if (!empty($this->district)){
+		$districtF = str_replace("'","\'", $this->district);
+		$filtersql	.=" and (tiregion like '$districtF') ";
 		}
+
+		$filtersql .= $this->FillFilterDate();
+
 		return $filtersql;
 	}
 
@@ -123,7 +153,7 @@ Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(in
 	//--------------------------------------------------------------------------------------
 	//	Расчитать интервалы простоя, сложив прости в каждой заявке по лифту
 	//--------------------------------------------------------------------------------------
-	public function MakeReportTable($params, $DateFrom, $DateTo, $OpStatus, $District)
+	public function MakeReportTable($filter, $DateFrom, $DateTo)
 	{
 		$ReportTable = [];
 
@@ -134,8 +164,6 @@ Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(in
 			return $ReportTable; 
 		}
 
- 		//$f1sql = self::FillParamsFilterWODistrict($this,$params);
- 		$f1sql = self::FillParamsFilter($this,$params);
 
 		$sqltext="SELECT ticket.id, ticket.tiaddress, ticket.tiobjectcode, tiequipment_id, ticode, tiregion, tiopenedtime, tioosbegin, tioosend, tiplannedtimenew,  oostypetext, tiproblemtypetext, tidescription, tiproblemtext, streetname, fabuildingno, elporchno, elporchpos, elinventoryno 
 		from ticket left join (
@@ -148,7 +176,7 @@ Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(in
  		left join oostype on ticket.tioostype_id=oostype.id
  		left join facility on ticket.tifacility_id =facility.id 
  		left join street on facility.fastreet_id =street.id
- 		where tiequipment_id is not null $f1sql order by tiregion, tiequipment_id, tioosbegin ";
+ 		where tiequipment_id is not null $filter order by tiregion, tiequipment_id, tioosbegin ";
 
 Yii::warning("\n---------------------------------SQL------------------\n".$sqltext.'\n');
 
@@ -212,29 +240,16 @@ Yii::warning("\n---------------------------------SQL------------------\n".$sqlte
 	}
 
 //--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------
-	public function generateReport($params)
-	{
-		//$intervals = self::MakeReportTable($params,'2000-01-01', date('d-M-y'), NULL, NULL);
-		//$sum = self::CalcIntervalsSum($intervals);
-//Yii::warning("\n----- sum ---------------------------------------\n".$sum."\n");
-	}
-
-//--------------------------------------------------------------------------------------
 //	Получить параметры лифтов, которые есть в отчете
 //--------------------------------------------------------------------------------------
 	function GetElevatorsParams($ReportTable)
 	{
-		$ellist = "(";
+		$ellist = "(0";
 		$first = true;
 		foreach($ReportTable as $rec)
 		{
-			if ($first) 
-				$first = false;
-			else 
-				$ellist .= ",";
-			if (!empty($rec['tiequipment_id'])) $ellist .= $rec['tiequipment_id'];
-			else $ellist .= 0;
+			if (!empty($rec['tiequipment_id'])) 
+				$ellist .= ",".$rec['tiequipment_id'];
 		}
 		$ellist .= ")";
 		$sql = "SELECT * from (
@@ -256,6 +271,7 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
 	}
 
 //--------------------------------------------------------------------------------------
+// Добавить в таблицу отчета параметры лифта	
 //--------------------------------------------------------------------------------------
 	function AddElPArams(&$ReportTable, $ElParams)
 	{
@@ -271,14 +287,16 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
 				$rec['ep_elnum'] = $elevator['elnum'];
 				$rec['ep_worknum'] = $elevator['worknum'];
 			}
-			//$rec['ep_elnum'] = 10;
 		}
 	}
+
 //--------------------------------------------------------------------------------------
+//	атавизм
+//	Устаревшая функция генерации отчетной таблицы	
 //--------------------------------------------------------------------------------------
 	public function generateListOld($params)
 	{
- 		$f1sql = self::FillParamsFilter($this,$params);
+ 		$f1sql = self::FillFilter();
 
 		$sqltext="SELECT ticket.id, ticket.tiaddress, ticket.tiobjectcode,ticode, tiregion, tiopenedtime, tioosbegin, tioosend, tiplannedtimenew, TIMESTAMPDIFF(HOUR,
 				IF ( (IFNULL(tioosbegin,'2000-01-01') < '{$this->datefrom}'), '{$this->datefrom}' , IFNULL(tioosbegin,'2000-01-01') ),
@@ -311,11 +329,67 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------
+	public function generateReport($params)
+	{
+ 		$filter = $this->FillFilterDate();
+
+		$ReportTable = $this->MakeReportTable($filter, $this->datefrom, $this->dateto);
+
+		$this->ElParams = $this->GetElevatorsParams($ReportTable);
+		$this->AddElPArams($ReportTable, $this->ElParams);
+
+		$Report = [];
+		$ReportLine = ['District'=>"",'e0'=>0, 'e1'=>0, 'e2'=>0,'h0'=>0, 'h1'=>0, 'h2'=>0];
+		$District = NULL;
+		$count = 0;
+		foreach($ReportTable as $rec){
+			$count++;
+Yii::warning("\n++++++++++ Report Rec -----------------------\n count: ".$count."\n tiregion: ".$rec['tiregion']);
+
+			if (is_null($District) || ($District != $rec['tiregion'])) {
+				if (!is_null($District))
+					$Report[$District] = $ReportLine;
+				$District = $rec['tiregion'];
+				$ReportLine = ['District'=>$District, 'e0'=>0, 'e1'=>0, 'e2'=>0,'h0'=>0, 'h1'=>0, 'h2'=>0];
+			}
+			switch($rec['ep_status']){
+				case '0': $ReportLine['e0']++; $ReportLine['h0'] += $rec['oosumtime']; break;
+				case '1': $ReportLine['e1']++; $ReportLine['h1'] += $rec['oosumtime']; break;
+				default : $ReportLine['e2']++; $ReportLine['h2'] += $rec['oosumtime']; break;
+			}
+		}
+		$Report[$District] = $ReportLine;
+
+		$provider = new ArrayDataProvider([
+			'allModels' => $Report,
+			'key' => 'District',
+			'sort' => [
+				'attributes' => [
+					'District',
+				],
+				'defaultOrder' => [ 'District' => SORT_ASC ],
+			],
+		]);
+		return $provider;	
+	}
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 	public function generateList($params)
 	{
-		//$ReportTable = self::MakeReportTable($params,'2000-01-01', date('d-M-y'), NULL, NULL);
-		$ReportTable = self::MakeReportTable($params,'01-08-2018', '20-08-2018', NULL, NULL);
-		self::AddElPArams($ReportTable, self::GetElevatorsParams($ReportTable));
+ 		$filter = $this->FillFilter();
+
+		$ReportTable = $this->MakeReportTable($filter, $this->datefrom, $this->dateto);
+
+		if (empty($this->ElParams)) 
+			$this->ElParams = $this->GetElevatorsParams($ReportTable);
+		$this->AddElPArams($ReportTable, $this->ElParams);
+
+		if (empty($this->recperpage)) 
+			$rpp = 10;
+		else
+			$rpp = $this->recperpage;
+
 		$provider = new ArrayDataProvider([
 			'allModels' => $ReportTable,
 			'key' => 'id',
@@ -326,8 +400,11 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
 				],
 				'defaultOrder' => [ 'tiincidenttime' => SORT_ASC ],
 			],
+			'pagination'=>['pageSize' => $rpp],
 		]);
 		return $provider;	
 	}
 
+
 }
+
