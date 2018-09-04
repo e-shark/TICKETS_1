@@ -24,7 +24,7 @@ class Report_RepairsList extends Model
     {
 		//---Preparу sql statement for opstatus filter
 		if(array_key_exists('opstatus', $this->attributes )){
-			$this->opstatus = empty($params['opstatus']) ?  '' : $params['opstatus'];
+			$this->opstatus = empty($params['opstatus']) ?  1 : $params['opstatus'];
 		}
 
 		//---Preparу sql  statement for datefrom
@@ -88,16 +88,16 @@ class Report_RepairsList extends Model
 		if(!empty($this->opstatus))	
 			switch($this->opstatus){
 				case 1:	// остановлен
-					$filtersql	 .=" and (elopstatus = 0) ";
+					$filtersql	 .=" and (st = 0) ";
 				break;
 				case 2:	// не определено
-					$filtersql	 .=" and (elopstatus is null) ";
+					$filtersql	 .=" and (st is null) ";
 				break;
 				case 3:	// восстановлен
-					$filtersql	 .=" and ((elopstatus = 1) and (tioosend is not null)) ";
+					$filtersql	 .=" and ((st = 1) and (tioosend is not null)) ";
 				break;
 				case 4:	// отремонтирован без останова
-					$filtersql	 .=" and ((elopstatus = 1) and (tioosbegin is null)) ";
+					$filtersql	 .=" and ((st = 1) and (tioosbegin is null)) ";
 				break;
 			}
 
@@ -164,13 +164,34 @@ Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(in
 			return $ReportTable; 
 		}
 
-
+/*
 		$sqltext="SELECT ticket.id, ticket.tiaddress, ticket.tiobjectcode, tiequipment_id, ticode, tiregion, tiopenedtime, tioosbegin, tioosend, tiplannedtimenew,  oostypetext, tiproblemtypetext, tidescription, tiproblemtext, streetname, fabuildingno, elporchno, elporchpos, elinventoryno 
 		from ticket left join (
 			select e.*, os.tiopstatus as elopstatus, os.tistatustime as elstatustime  from elevator e
 			left join (
 				select ts.* from (select t.id, t.tiequipment_id, t.tiopstatus, t.tistatustime from ticket t order by t.tistatustime desc) ts group by ts.tiequipment_id
 			) os on os.tiequipment_id = e.id			
+		) el on ticket.tiobjectcode=el.elinventoryno
+ 		left join ticketproblemtype on ticket.tiproblemtype_id =ticketproblemtype.id 
+ 		left join oostype on ticket.tioostype_id=oostype.id
+ 		left join facility on ticket.tifacility_id =facility.id 
+ 		left join street on facility.fastreet_id =street.id
+ 		where tiequipment_id is not null $filter order by tiregion, tiequipment_id, tioosbegin ";
+*/
+
+		$sqltext="SELECT ticket.id, ticket.tiaddress, ticket.tiobjectcode, tiequipment_id, ticode, tiregion, tiopenedtime, tioosbegin, tioosend, tiplannedtimenew,  oostypetext, tiproblemtypetext, tidescription, tiproblemtext, streetname, fabuildingno, elporchno, elporchpos, elinventoryno 
+		from ticket left join (
+	SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.st) worknum
+   FROM (SELECT CONCAT (e.elfacility_id, e.elporchno) sid, s.tiopstatus st, e.* FROM elevator e  INNER JOIN 
+       (SELECT t.tiequipment_id, t.tiopstatus, MAX(t.tistatustime) lasttime, t.tifacility_id
+           FROM ticket t WHERE t.tiequipment_id IN (SELECT id FROM elevator WHERE eldevicetype = 1)
+                GROUP BY t.tiequipment_id) s ON e.id = s.tiequipment_id) a GROUP BY a.sid) e2 INNER JOIN
+                 (SELECT CONCAT (e.elfacility_id, e.elporchno) sid, s.lasttime, s.tiopstatus st, e.*
+                    FROM elevator e INNER JOIN (SELECT t.tiequipment_id, t.tiopstatus,
+             MAX(t.tistatustime) lasttime, t.tifacility_id 
+             FROM ticket t WHERE t.tiequipment_id IN (SELECT id FROM elevator WHERE eldevicetype = 1)
+             GROUP BY t.tiequipment_id) s ON e.id = s.tiequipment_id) p ON  p.sid = e2.sid
+
 		) el on ticket.tiobjectcode=el.elinventoryno
  		left join ticketproblemtype on ticket.tiproblemtype_id =ticketproblemtype.id 
  		left join oostype on ticket.tioostype_id=oostype.id
