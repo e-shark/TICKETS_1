@@ -2,6 +2,7 @@
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\jui\DatePicker;
 
 
 $this->title = 'Отчет по простоям лифтов при ремонте';
@@ -22,7 +23,17 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
 	<h1><?= Html::encode($this->title) ?></h1>
 
 
-    <h3>Сводный отчет по простоям </h3>У
+    <h3>Сводный отчет по простоям за период с <?php echo date("d-m-Y",strtotime($model->datefrom)); ?>
+    <?php
+    /*
+        echo DatePicker::widget(['name'  => 'datefrom2',
+                                    'value'  => $model->datefrom,
+                                    'dateFormat' => 'dd-MM-yyyy',
+                                    'options'=>[ 'form'=>'formFltr1']]);
+                                    */
+    ?>
+    по <?php echo date("d-m-Y H:i:s",strtotime($model->dateend)); ?>
+    </h3>
     <?php 
         $repColumns = [
             [
@@ -33,32 +44,45 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
                 'label' => "Остановленых,<br>лифтов (часов)",
                 'encodeLabel' => false,
                 'content' => function($data){ 
-                    return $data['e0']."&nbsp;&nbsp;(".$data['h0'].")";
+                    $res = $data['e0']."&nbsp;&nbsp;(".$data['h0'].")";
+                    if (true == $data['total']) $res = "<b>".$res."</b>";
+                    return $res;
                 }
             ],
             [
                 'label' => "Статус не определён,<br>лифтов (часов)",
                 'encodeLabel' => false,
                 'content' => function($data){ 
-                    return $data['e2']."&nbsp;&nbsp;(".$data['h2'].")";
+                    $res = $data['e2']."&nbsp;&nbsp;(".$data['h2'].")";
+                    if (true == $data['total']) $res = "<b>".$res."</b>";
+                    return $res;
                 }
             ],
             [
                 'label' => "В работе (были в простое),<br>лифтов (часов)",
                 'encodeLabel' => false,
                 'content' => function($data){ 
-                    return $data['e1']."&nbsp;&nbsp;(".$data['h1'].")";
+                    $res = $data['e1']."&nbsp;&nbsp;(".$data['h1'].")";
+                    if (true == $data['total']) $res = "<b>".$res."</b>";
+                    return $res;
                 }
             ],
         ];
         echo GridView::widget([
             'dataProvider' => $report,
             'columns' => $repColumns, 
+            'rowOptions' => function ($model, $key, $index, $grid) {
+                    if (true == $model['total'])
+                    $res = ['style' => 'background-color :silver;'];
+                    //else
+                    //$res = ['style' => 'color:blue;'];
+                    return $res;
+                }
         ]);
 
     ?>
 
-    <h3>Отчет по простоям</h3>
+    <h3>Отчет по лифтам</h3>
 
     <?php echo $this->render('_paramsfilter1.php', [ 'model'=>$model]); ?>
 

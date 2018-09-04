@@ -32,12 +32,6 @@ use frontend\models\Report_Titotals;
       echo Html::beginForm([/*'titotals'*/$this->context->getRoute()],'get',['class'=>'form','id'=>'formFltr1']);
       echo '<div class="row">';
 
-      //----Records per page
-      if( array_key_exists('recperpage',$model->attributes ) ) {
-        echo '<div class="form-group col-xs-2"> Записей на странице:'.
-        Html::dropDownList('recperpage', $model->recperpage,  ['5'=>5, '10'=>10, '15'=>15, '20'=>20, '25'=>25, '30'=>30, '50'=>50, '100'=>100, '200'=>200],['class'=>'form-control']).'</div>';
-      }
-      
       //----Districts list
       if( array_key_exists('district',$model->attributes ) ) {
         echo '<div class="form-group col-xs-2"> Район :'.
@@ -113,7 +107,7 @@ use frontend\models\Report_Titotals;
       //---opstatus 
       if( array_key_exists('opstatus',$model->attributes ) ) {
         echo '<div class="form-group col-xs-2" id="opstatus"> Статус:'.
-        Html::dropDownList('opstatus',$model->opstatus,[0=>'Все',1=>'Остановлен',2=>'Не определен',3=>'Восстановлен'/*,4=>'без останова'*/],['class'=>'form-control']).'</div>';
+        Html::dropDownList('opstatus',$model->opstatus,[0=>'Все',1=>'Остановлен',2=>'Не определен', 3=>'В работе',/* 4=>'без останова'*/],['class'=>'form-control']).'</div>';
       }
       //---Report page size
       if( array_key_exists('reportpagesize',$model->attributes ) ) {

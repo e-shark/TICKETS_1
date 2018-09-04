@@ -11,10 +11,11 @@ class Report_RepairsList extends Model
 {
 	public $district;
 	public $datefrom;
-	public $dateto;
+	public $dateend;
+	//public $dateto;
 	//public $tifindstr;
 	public $opstatus;
-	public $recperpage;
+	public $reportpagesize;
 
 	public $ElParams;
 
@@ -24,7 +25,7 @@ class Report_RepairsList extends Model
     {
 		//---Preparу sql statement for opstatus filter
 		if(array_key_exists('opstatus', $this->attributes )){
-			$this->opstatus = empty($params['opstatus']) ?  1 : $params['opstatus'];
+			$this->opstatus = is_null($params['opstatus']) ?  1 : $params['opstatus'];
 		}
 
 		//---Preparу sql  statement for datefrom
@@ -43,6 +44,7 @@ class Report_RepairsList extends Model
 			$this->dateto = $dateiso;
 			if($this->dateto < $this->datefrom) $this->dateto = $this->datefrom;
 		}
+		$this->dateend = date('Y-m-d H:i:s');
 
 		//---Preparу sql  statement for district
 		if( array_key_exists('district', $this->attributes ) ) if( !empty($params['district'] ) ) {
@@ -50,11 +52,11 @@ class Report_RepairsList extends Model
 		}
 
 		//---Preparу sql  statement for district
-		if( array_key_exists('recperpage', $this->attributes ) ) {
-			if( !empty($params['recperpage'] ) ) 
-				$this->recperpage = $params['recperpage'];
+		if( array_key_exists('reportpagesize', $this->attributes ) ) {
+			if( !empty($params['reportpagesize'] ) ) 
+				$this->reportpagesize = $params['reportpagesize'];
 			else
-				$this->recperpage = 20;
+				$this->reportpagesize = 20;
 		}
 	}
 
@@ -65,9 +67,9 @@ class Report_RepairsList extends Model
 		$filtersql = "";
 
 		$filtersql	.=" and (tioosbegin is not null) ";						// нас интересуют только лифты в останове
-		if (!empty($this->dateto)) {
-			$oosend  = $this->dateto;
-			$filtersql	.= " and (tioosbegin < '$this->dateto') ";		// не рассматриваем лифты, остановленные после интересующего периода
+		if (!empty($this->dateend)) {
+			$oosend  = $this->dateend;
+			$filtersql	.= " and (tioosbegin < '$this->dateend') ";		// не рассматриваем лифты, остановленные после интересующего периода
 		}
 		else $oosend = date('d-M-y');
 		if (!empty($this->datefrom)) {
@@ -93,8 +95,8 @@ class Report_RepairsList extends Model
 				case 2:	// не определено
 					$filtersql	 .=" and (st is null) ";
 				break;
-				case 3:	// восстановлен
-					$filtersql	 .=" and ((st = 1) and (tioosend is not null)) ";
+				case 3:	// В работе
+					$filtersql	 .=" and (st = 1)";
 				break;
 				case 4:	// отремонтирован без останова
 					$filtersql	 .=" and ((st = 1) and (tioosbegin is null)) ";
@@ -312,55 +314,19 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
 	}
 
 //--------------------------------------------------------------------------------------
-//	атавизм
-//	Устаревшая функция генерации отчетной таблицы	
-//--------------------------------------------------------------------------------------
-	public function generateListOld($params)
-	{
- 		$f1sql = self::FillFilter();
-
-		$sqltext="SELECT ticket.id, ticket.tiaddress, ticket.tiobjectcode,ticode, tiregion, tiopenedtime, tioosbegin, tioosend, tiplannedtimenew, TIMESTAMPDIFF(HOUR,
-				IF ( (IFNULL(tioosbegin,'2000-01-01') < '{$this->datefrom}'), '{$this->datefrom}' , IFNULL(tioosbegin,'2000-01-01') ),
-				IF ( (IFNULL(tioosend,now()) > '{$this->dateto}'), '{$this->dateto}' , IFNULL(tioosend,now()) )
-			) as oostime, oostypetext, tiproblemtypetext, tidescription, tiproblemtext, streetname, fabuildingno, elporchno, elporchpos, elinventoryno 
-		from ticket left join (
-			select e.*, os.tiopstatus as elopstatus, os.tistatustime as elstatustime  from elevator e
-			left join (
-				select ts.* from (select t.id, t.tiequipment_id, t.tiopstatus, t.tistatustime from ticket t order by t.tistatustime desc) ts group by ts.tiequipment_id
-			) os on os.tiequipment_id = e.id			
-		) el on ticket.tiobjectcode=el.elinventoryno
- 		left join ticketproblemtype on ticket.tiproblemtype_id =ticketproblemtype.id 
- 		left join oostype on ticket.tioostype_id=oostype.id
- 		left join facility on ticket.tifacility_id =facility.id 
- 		left join street on facility.fastreet_id =street.id
- 		where tioosbegin is not null $f1sql order by tiregion";
-
-		$provider = new SqlDataProvider([
-			'sql' => $sqltext,
-			'key' => 'id',
-			'sort' => [
-				'attributes' => [
-					'tiregion',
-				],
-				'defaultOrder' => [ 'tiregion' => SORT_ASC ],
-			],
-		]);
-		return $provider;	
-	}
-
-//--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------
 	public function generateReport($params)
 	{
  		$filter = $this->FillFilterDate();
 
-		$ReportTable = $this->MakeReportTable($filter, $this->datefrom, $this->dateto);
+		$ReportTable = $this->MakeReportTable($filter, $this->datefrom, $this->dateend);
 
 		$this->ElParams = $this->GetElevatorsParams($ReportTable);
 		$this->AddElPArams($ReportTable, $this->ElParams);
 
 		$Report = [];
 		$ReportLine = ['District'=>"",'e0'=>0, 'e1'=>0, 'e2'=>0,'h0'=>0, 'h1'=>0, 'h2'=>0];
+		$SummLine = ['District'=>"ИТОГО",'e0'=>0, 'e1'=>0, 'e2'=>0,'h0'=>0, 'h1'=>0, 'h2'=>0, 'total'=>true];
 		$District = NULL;
 		$count = 0;
 		foreach($ReportTable as $rec){
@@ -368,8 +334,15 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
 Yii::warning("\n++++++++++ Report Rec -----------------------\n count: ".$count."\n tiregion: ".$rec['tiregion']);
 
 			if (is_null($District) || ($District != $rec['tiregion'])) {
-				if (!is_null($District))
+				if (!is_null($District)) {
 					$Report[$District] = $ReportLine;
+					$SummLine['e0'] += $ReportLine['e0'];
+					$SummLine['e1'] += $ReportLine['e1'];
+					$SummLine['e2'] += $ReportLine['e2'];
+					$SummLine['h0'] += $ReportLine['h0'];
+					$SummLine['h1'] += $ReportLine['h1'];
+					$SummLine['h2'] += $ReportLine['h2'];
+				}
 				$District = $rec['tiregion'];
 				$ReportLine = ['District'=>$District, 'e0'=>0, 'e1'=>0, 'e2'=>0,'h0'=>0, 'h1'=>0, 'h2'=>0];
 			}
@@ -380,16 +353,17 @@ Yii::warning("\n++++++++++ Report Rec -----------------------\n count: ".$count.
 			}
 		}
 		$Report[$District] = $ReportLine;
+		$SummLine['e0'] += $ReportLine['e0'];
+		$SummLine['e1'] += $ReportLine['e1'];
+		$SummLine['e2'] += $ReportLine['e2'];
+		$SummLine['h0'] += $ReportLine['h0'];
+		$SummLine['h1'] += $ReportLine['h1'];
+		$SummLine['h2'] += $ReportLine['h2'];
+		$Report[] = $SummLine;
 
 		$provider = new ArrayDataProvider([
 			'allModels' => $Report,
 			'key' => 'District',
-			'sort' => [
-				'attributes' => [
-					'District',
-				],
-				'defaultOrder' => [ 'District' => SORT_ASC ],
-			],
 		]);
 		return $provider;	
 	}
@@ -400,16 +374,16 @@ Yii::warning("\n++++++++++ Report Rec -----------------------\n count: ".$count.
 	{
  		$filter = $this->FillFilter();
 
-		$ReportTable = $this->MakeReportTable($filter, $this->datefrom, $this->dateto);
+		$ReportTable = $this->MakeReportTable($filter, $this->datefrom, $this->dateend);
 
 		if (empty($this->ElParams)) 
 			$this->ElParams = $this->GetElevatorsParams($ReportTable);
 		$this->AddElPArams($ReportTable, $this->ElParams);
 
-		if (empty($this->recperpage)) 
+		if (empty($this->reportpagesize)) 
 			$rpp = 10;
 		else
-			$rpp = $this->recperpage;
+			$rpp = $this->reportpagesize;
 
 		$provider = new ArrayDataProvider([
 			'allModels' => $ReportTable,
