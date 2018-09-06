@@ -11,7 +11,7 @@ use frontend\models\Tickets;
 
 class Meter extends Model
 {
-    const READINGSPATH  = 'appdatastore'.DIRECTORY_SEPARATOR.'MeterDialPhoto';		// Директория (относительно приложения), куда  будут складываться фотографии показаний счетчика
+    const READINGSPATH  = 'MeterDialPhoto';		// Директория (в дирректории данных), куда  будут складываться фотографии показаний счетчика
     const CalibrationOBIS = 'C.2.5';										// ОБИС код параметра "дата кпоследней поверки" (калибровки)
 
     public $imageFile;
@@ -205,7 +205,7 @@ class Meter extends Model
     // Получить путь, где складываем фото показаний
 	public function MakePhotoFilePath()
 	{
-    	$res = Yii::getAlias('@app').DIRECTORY_SEPARATOR.Meter::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$this->MeterId.DIRECTORY_SEPARATOR;
+    	$res = Yii::getAlias('@AppDataStore').DIRECTORY_SEPARATOR.Meter::READINGSPATH.DIRECTORY_SEPARATOR.'M'.$this->MeterId.DIRECTORY_SEPARATOR;
     	return $res;
 	}
 

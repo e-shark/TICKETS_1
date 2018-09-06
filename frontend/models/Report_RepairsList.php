@@ -118,7 +118,7 @@ class Report_RepairsList extends Model
 	function CalcIntervalsSum($iedgs)
 	{
 		ksort($iedgs);
-Yii::warning("-------------------- intervals sort ------------------------[\n".json_encode($iedgs)."\n]");
+//Yii::warning("-------------------- intervals sort ------------------------[\n".json_encode($iedgs)."\n]");
 
 		// Складываем концы интервалов в интервалы
 		$intervals = [];
@@ -127,11 +127,11 @@ Yii::warning("-------------------- intervals sort ------------------------[\n".j
 			if ((0 == $count) && (1 == $type))
 				$ni = ['begin' => $time];
 			$count += $type;
-Yii::warning("\n----- time ---------------------------------------\n cnt:".$count."  type:".$type."  time: (".$time.") ".date('d-m-Y H:i:s',$time)."\n");
+//Yii::warning("\n----- time ---------------------------------------\n cnt:".$count."  type:".$type."  time: (".$time.") ".date('d-m-Y H:i:s',$time)."\n");
 			if ((0 == $count) && (-1 == $type)){
 				$ni['end'] = $time;
 				$intervals[] = $ni;
-Yii::warning("\n----- add ---------------------------------------\n".date('d-m-Y H:i:s',$ni['begin'])." - ".date('d-m-Y H:i:s',$ni['end'])."\n");
+//Yii::warning("\n----- add ---------------------------------------\n".date('d-m-Y H:i:s',$ni['begin'])." - ".date('d-m-Y H:i:s',$ni['end'])."\n");
 			}
 		}
 
@@ -139,7 +139,7 @@ Yii::warning("\n----- add ---------------------------------------\n".date('d-m-Y
 		$sum = 0;
 		if (!empty($intervals)){
 			foreach($intervals as $interval){
-Yii::warning("\n----- suminterval ---------------------------------------\n".date('d-m-Y H:i:s',$interval['begin'])." - ".date('d-m-Y H:i:s',$interval['end'])."\n");
+//Yii::warning("\n----- suminterval ---------------------------------------\n".date('d-m-Y H:i:s',$interval['begin'])." - ".date('d-m-Y H:i:s',$interval['end'])."\n");
 				try{ 
 					$tb = $interval['begin'];
 					$te = $interval['end'];
@@ -148,7 +148,7 @@ Yii::warning("\n----- suminterval ---------------------------------------\n".dat
 				catch(\Exception $e){ continue; }
 			}
 		}
-Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(int)($sum/60/60)."\n");
+//Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(int)($sum/60/60)."\n");
 		return $sum;		
 	}
 
@@ -193,15 +193,14 @@ Yii::warning("\n******* SUM ****************************\n sum=".$sum."    ".(in
              MAX(t.tistatustime) lasttime, t.tifacility_id 
              FROM ticket t WHERE t.tiequipment_id IN (SELECT id FROM elevator WHERE eldevicetype = 1)
              GROUP BY t.tiequipment_id) s ON e.id = s.tiequipment_id) p ON  p.sid = e2.sid
-
-		) el on ticket.tiobjectcode=el.elinventoryno
+		) el on ticket.tiequipment_id=el.id
  		left join ticketproblemtype on ticket.tiproblemtype_id =ticketproblemtype.id 
  		left join oostype on ticket.tioostype_id=oostype.id
  		left join facility on ticket.tifacility_id =facility.id 
  		left join street on facility.fastreet_id =street.id
  		where tiequipment_id is not null $filter order by tiregion, tiequipment_id, tioosbegin ";
 
-Yii::warning("\n---------------------------------SQL------------------\n".$sqltext.'\n');
+//Yii::warning("\n---------------------------------SQL------------------\n".$sqltext.'\n');
 
 		$tickets = Yii::$app->db->createCommand($sqltext)->queryAll();	
 
@@ -213,7 +212,7 @@ Yii::warning("\n---------------------------------SQL------------------\n".$sqlte
 				// следующий лифт
 				if (!$start){
 					// Делаем расчет и сохраняем запись по предидущему лифту
-					Yii::warning("\n=== CALC ================================\n eq_id:".$ReportTableRec['tiequipment_id']."\n eq_cod:".$ReportTableRec['tiobjectcode']."\n");
+					//Yii::warning("\n=== CALC ================================\n eq_id:".$ReportTableRec['tiequipment_id']."\n eq_cod:".$ReportTableRec['tiobjectcode']."\n");
 					$sumtime = self::CalcIntervalsSum( $intervals );
 					$ReportTableRec['oosumtime'] = (int)($sumtime/60/60);
 					$ReportTable[] = $ReportTableRec;
@@ -242,7 +241,6 @@ Yii::warning("\n---------------------------------SQL------------------\n".$sqlte
 			try{ $iend = strtotime( $tend ); } catch(\Exception $e){ continue; }
 			if ($ibegin < $iDateFrom) $ibegin = $iDateFrom;
 			if ($iend > $iDateTo) $iend = $iDateTo;
-		//Yii::warning("\n--- interval ---------------------------------------\n [".$ticket['tioosbegin']."]: ".$tbegin."  = ".$ibegin." \n [".$ticket['tioosend']."]: ".$tend."  = ".$iend."\n");
 			while( isset($intervals[$ibegin]) ) $ibegin++;
 			$intervals[$ibegin] = +1;
 			while( isset($intervals[$iend]) ) $iend++;
@@ -253,7 +251,7 @@ Yii::warning("\n---------------------------------SQL------------------\n".$sqlte
 
 		if (!$start){
 			// Делаем расчет и сохраняем последнюю запись
-			Yii::warning("\n=== CALC END ============================\n eq_id:".$ReportTableRec['tiequipment_id']."\n eq_cod:".$ReportTableRec['tiobjectcode']."\n");
+			//Yii::warning("\n=== CALC END ============================\n eq_id:".$ReportTableRec['tiequipment_id']."\n eq_cod:".$ReportTableRec['tiobjectcode']."\n");
 			$sumtime = self::CalcIntervalsSum( $intervals );
 			$ReportTableRec['oosumtime'] = (int)($sumtime/60/60);
 			$ReportTable[] = $ReportTableRec;
@@ -287,7 +285,6 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
              FROM ticket t WHERE t.tiequipment_id IN (SELECT id FROM elevator WHERE eldevicetype = 1)
              GROUP BY t.tiequipment_id) s ON e.id = s.tiequipment_id) p ON  p.sid = e2.sid
         ) x where x.id in ".$ellist." ;";
-//Yii::warning("\n=== ellist ============================\n ellist: ".$ellist."\n sql: ".$sql);
 		$elparams = Yii::$app->db->createCommand($sql)->queryAll();	
 		
 		return $elparams;
@@ -331,7 +328,6 @@ SELECT e2.elnum, e2.worknum, p.*  FROM (SELECT a.sid, COUNT(a.sid) elnum, SUM(a.
 		$count = 0;
 		foreach($ReportTable as $rec){
 			$count++;
-Yii::warning("\n++++++++++ Report Rec -----------------------\n count: ".$count."\n tiregion: ".$rec['tiregion']);
 
 			if (is_null($District) || ($District != $rec['tiregion'])) {
 				if (!is_null($District)) {

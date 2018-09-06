@@ -186,14 +186,22 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']],'post') ?>
     <?php echo Html::hiddenInput('MeterId', $passport['id']); ?>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
             <div class="input-group">
-                <span class="input-group-addon">Дата снятия показаний</span>
-                <?php echo DatePicker::widget(['name'  => 'MeterDateTime',
+                <span class="input-group-addon">Дата</span>
+                <?php echo DatePicker::widget(['name'  => 'MeterDate',
                                     'value'  => date("d-m-Y"),
                                     'dateFormat' => 'dd-MM-yyyy',
                                     'options'=>['class'=>'form-control']]);
                 ?>                
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-addon">Время </span>
+                    <?php $ts=""; for($i=0;$i<24;$i++) $ts[]=sprintf( "%02d:00", $i); ?>
+                    <?php echo Html::dropDownList('MeterTime', date("H"), $ts, ['id'=>'MeterTime','class'=>'form-control','onChange'=>'onSelectRegion()']); ?> 
             </div>
         </div>
 

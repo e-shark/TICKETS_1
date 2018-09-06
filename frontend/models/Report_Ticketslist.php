@@ -18,6 +18,7 @@ class Report_Ticketslist extends Model
     public $tifindstr;
     public $tiexecutant;
     public $reportpagesize;
+    public $tiobjectcode;
     
     //public $sqls;
     //public $params;

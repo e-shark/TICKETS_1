@@ -70,6 +70,7 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
         ];
         echo GridView::widget([
             'dataProvider' => $report,
+            'summary' => false,
             'columns' => $repColumns, 
             'rowOptions' => function ($model, $key, $index, $grid) {
                     if (true == $model['total'])
@@ -97,10 +98,14 @@ $this->registerJs( 'function print_page(){window.print() ;}', yii\web\View::POS_
                 'label' =>"Номер лифта",
                 //'attribute' => 'tiobjectcode',
                 'format' => 'html',
-                'content'=> function($data){
-                    return  $data['tiobjectcode'];
-					//$url = Url::toRoute(['reports/ticketslist', 'tifindstr' => $data['tiobjectcode']]);
-					//return  "<a href=$url>".$data['tiobjectcode'].'</a>';
+                'content'=> function($data) use ($model){
+                    //return  $data['tiobjectcode'];
+					$url = Url::toRoute(['reports/ticketslist', 
+                                         'tiobjectcode' => $data['tiobjectcode'], 
+                                         'datefrom' => $model->datefrom, 
+                                         'dateto'=>$model->dateend,
+                                        ]);
+					return  "<a href=$url>".$data['tiobjectcode'].'</a>';
 				},
 			],
             [
