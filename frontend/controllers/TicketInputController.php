@@ -137,6 +137,11 @@ class TicketInputController extends Controller
             if (! empty($data)){
                 $nowdate = date("Y-m-d H:i:s");
 
+                if (!empty($data['tiRegion']))
+                    $_SESSION['InputTicketSelectRegion'] = $data['tiRegion'];
+                if (!empty($data['tiObject']))
+                    $_SESSION['InputTicketSelectObject'] = $data['tiObject'];
+
                 $Ticket = new TicketAddData();
                 $Ticket->ticodeex = NULL;
                 $Ticket->tipriority = $data['tiPriority'];

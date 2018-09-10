@@ -189,7 +189,6 @@ class TicketsController extends Controller
         }
     }
 
-
     public function actions()
     {
         return [

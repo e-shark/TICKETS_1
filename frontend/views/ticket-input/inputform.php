@@ -36,7 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
           <?php echo Html::label(Yii::t('ticketinputform','Object')); ?>
         </div>
         <div class="col-md-5">
-          <?php echo Html::dropDownList('tiObject', 'null', ArrayHelper::map($model->tiObjects,'tiobjectcode','tiobject'),['id'=>'ObjectsSelect','class'=>'form-control','onChange'=>'onSelectObject()']); ?> 
+          <?php $tiobj = is_null($_SESSION['InputTicketSelectObject'])?"001":$_SESSION['InputTicketSelectObject'] ;?>
+          <?php echo Html::dropDownList('tiObject', $tiobj, ArrayHelper::map($model->tiObjects,'tiobjectcode','tiobject'),['id'=>'ObjectsSelect','class'=>'form-control','onChange'=>'onSelectObject()']); ?> 
         </div>
       </div>
 
@@ -47,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="col-md-8" id='divProblemSelect' onChange='onSelectProblem()'>
           <?php //echo Html::dropDownList('tiProblem', 'null', ArrayHelper::map($model->tiProblems,'tiproblemtypecode','tiproblemtypetext'),['id'=>'ProblemSelect','class'=>'form-control']); ?> 
-          <?php echo $model->getProblemsList(1); ?>
+          <?php echo $model->getProblemsList($tiobj); ?>
         </div>
       </div>
 
@@ -106,7 +107,8 @@ $this->params['breadcrumbs'][] = $this->title;
           <?php echo Html::label(Yii::t('ticketinputform','Region')); ?>
         </div>
         <div class="col-md-8">
-          <?php echo Html::dropDownList('tiRegion', 'null', ArrayHelper::map($model->tiRegions,'districtcode','districtname'), ['id'=>'tiRegionSelect','class'=>'form-control','onChange'=>'onSelectRegion()']); ?> 
+          <?php $tireg = is_null($_SESSION['InputTicketSelectRegion'])?0:$_SESSION['InputTicketSelectRegion'] ;?>
+          <?php echo Html::dropDownList('tiRegion', $tireg, ArrayHelper::map($model->tiRegions,'districtcode','districtname'), ['id'=>'tiRegionSelect','class'=>'form-control','onChange'=>'onSelectRegion()']); ?> 
         </div>
       </div>
 
@@ -261,7 +263,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <br>
 
 <div class="row">
-  <div class="col-md-offset-1">
+  <div class="col-md-offset-1" id="divSubmitButton" hidden>
     <?php echo Html::submitButton(Yii::t('ticketinputform','Transfer to LAS'),['id' => 'SubmitButton', 'class'=>'submit btn btn-success']); ?>
   </div>
 </div>
@@ -425,6 +427,10 @@ function onSelectStreet(){
 }
 
 function onSelectRegion(){
+  if (0==$("#tiRegionSelect").val()){
+    $("#divSubmitButton").hide();
+  }else{
+    $("#divSubmitButton").show();
     $.ajax({
          url: '$addr1',
          type: "POST",
@@ -438,8 +444,8 @@ function onSelectRegion(){
          error:   function() {
                 $("#tiStreetSelect").html('AJAX error!');
          }
-
-  });
+    });
+  }
   return false;
 }
 
